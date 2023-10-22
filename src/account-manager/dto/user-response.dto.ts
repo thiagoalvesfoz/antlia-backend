@@ -1,15 +1,33 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Role } from '../entity/role.entity';
 import { User } from '../entity/user.entity';
 
 export class UserDto {
+  @ApiProperty()
   id?: string;
+
+  @ApiProperty()
   username: string;
+
+  @ApiProperty()
   name: string;
+
+  @ApiProperty()
   email: string;
+
+  @ApiProperty()
   cell_phone: string;
+
+  @ApiProperty()
   profile_id: string;
+
+  @ApiProperty()
   created_at?: Date;
+
+  @ApiProperty()
   updated_at?: Date;
+
+  @ApiProperty()
   roles: Role[];
 
   constructor(user: User) {

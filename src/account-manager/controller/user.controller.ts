@@ -4,6 +4,7 @@ import { CreateUserDto } from '../dto/create-user.dto';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from '../entity/role.entity';
 import { ApiTags } from '@nestjs/swagger';
+import { UserDto } from '../dto/user-response.dto';
 
 @ApiTags('Users')
 @Controller('users')
@@ -12,7 +13,7 @@ export class UsersController {
 
   @Post()
   @Roles(Role.ADMIN)
-  create(@Body() createUserDto: CreateUserDto) {
+  create(@Body() createUserDto: CreateUserDto): Promise<UserDto> {
     return this.usersService.create(createUserDto);
   }
 
