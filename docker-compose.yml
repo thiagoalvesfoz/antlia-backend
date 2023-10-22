@@ -1,0 +1,26 @@
+version: '3'
+
+services:
+  mysql:
+      image: mysql:8.0.28
+      container_name: db_mysql
+      environment:
+        LANG : C.UTF-8
+        MYSQL_USER: antlia
+        MYSQL_PASSWORD: root
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_DATABASE: antlia
+        TZ: UTC
+      ports:
+        - "3306:3306"
+      volumes:
+        - antlia-mysql:/var/lib/mysql
+      networks:
+        - mysql
+
+volumes:
+  antlia-mysql:
+
+networks:
+  mysql:
+
