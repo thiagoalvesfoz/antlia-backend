@@ -42,5 +42,6 @@ model Role {
   name  String         @unique
   users RolesOnUsers[]
 
+  @@index([name])
   @@map(name: "roles")
 }

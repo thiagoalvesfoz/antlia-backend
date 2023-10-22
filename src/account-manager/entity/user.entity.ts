@@ -1,5 +1,5 @@
-import { BusinessRuleException } from 'src/@shared/business-rule.exception';
 import { Role } from './role.entity';
+import * as bcrypt from 'bcrypt';
 
 export type UserProps = {
   id?: string;
@@ -7,7 +7,7 @@ export type UserProps = {
   password: string;
   created_at?: Date;
   updated_at?: Date;
-  roles: Role[];
+  roles?: Role[];
 };
 
 export class User {
@@ -16,22 +16,18 @@ export class User {
   password: string;
   created_at?: Date;
   updated_at?: Date;
-  roles: Role[];
+  roles?: Role[];
 
   constructor(props: UserProps) {
     this.id = props.id;
     this.username = props.username;
     this.password = props.password;
+    this.roles = props.roles;
     this.created_at = props.created_at;
     this.updated_at = props.updated_at;
-    this.addRoles(props.roles);
   }
 
-  addRoles(roles: Role[]) {
-    if (roles?.length === 0) {
-      throw new BusinessRuleException('roles is required');
-    }
-
-    this.roles = roles;
+  encrypt_password() {
+    this.password = bcrypt.hashSync(this.password, 10);
   }
 }
