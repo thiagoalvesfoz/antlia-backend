@@ -7,6 +7,7 @@ import { BusinessRuleException } from 'src/@shared/business-rule.exception';
 import { Role } from '../entity/role.entity';
 import { UserDto } from '../dto/user-response.dto';
 import { ResourceNotFoundException } from 'src/@shared/resource-not-found.exception';
+import { Profile } from '../entity/profile.entity';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +17,15 @@ export class UsersService {
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<UserDto> {
-    const { username, password, password_confirmation, roles } = createUserDto;
+    const {
+      username,
+      password,
+      password_confirmation,
+      roles,
+      name,
+      email,
+      cell_phone,
+    } = createUserDto;
 
     if (password !== password_confirmation) {
       throw new BusinessRuleException(
@@ -38,6 +47,7 @@ export class UsersService {
       username,
       password,
       roles: assigned_roles,
+      profile: new Profile({ name, email, cell_phone }),
     });
 
     register.encrypt_password();

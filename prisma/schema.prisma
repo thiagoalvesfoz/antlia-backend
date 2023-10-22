@@ -19,6 +19,7 @@ model User {
   created_at DateTime       @default(now())
   updated_at DateTime       @default(now()) @updatedAt
   roles      RolesOnUsers[]
+  profile    Profile?
 
   @@index([id])
   @@map(name: "users")
@@ -44,4 +45,18 @@ model Role {
 
   @@index([name])
   @@map(name: "roles")
+}
+
+model Profile {
+  id         String   @id @default(uuid())
+  name       String
+  cell_phone String
+  email      String   @unique
+  user       User?    @relation(fields: [user_id], references: [id])
+  user_id    String?  @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@index([id, name, email])
+  @@map(name: "profiles")
 }

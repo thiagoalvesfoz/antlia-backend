@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { User } from '../entity/user.entity';
 import { UserRepository } from './users.repository';
-import { User as UserModel } from '@prisma/client';
+import { Profile as ProfileModel, User as UserModel } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Role } from '../entity/role.entity';
 
@@ -14,12 +14,24 @@ type RolesProps = {
 
 type UserModelMapper = UserModel & {
   roles?: RolesProps[];
+  profile: ProfileModel;
 };
 
-const include_roles = {
+const include_roles_and_profile = {
   roles: {
     select: {
       role: true,
+    },
+  },
+  profile: {
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      cell_phone: true,
+      user_id: true,
+      created_at: true,
+      updated_at: true,
     },
   },
 };
@@ -45,8 +57,15 @@ export class UserMysqlRepository implements UserRepository {
             },
           })),
         },
+        profile: {
+          create: {
+            name: user.profile.name,
+            email: user.profile.email,
+            cell_phone: user.profile.cell_phone,
+          },
+        },
       },
-      include: include_roles,
+      include: include_roles_and_profile,
     });
 
     return this.#map(userModel);
@@ -54,7 +73,7 @@ export class UserMysqlRepository implements UserRepository {
 
   async findAll(): Promise<User[]> {
     const users: UserModel[] = await this.prismaService.user.findMany({
-      include: include_roles,
+      include: include_roles_and_profile,
     });
 
     return users.map(this.#map);
@@ -65,7 +84,7 @@ export class UserMysqlRepository implements UserRepository {
 
     const userModel = await this.prismaService.user.findFirst({
       where: { id },
-      include: include_roles,
+      include: include_roles_and_profile,
     });
 
     return this.#map(userModel);
@@ -86,8 +105,10 @@ export class UserMysqlRepository implements UserRepository {
 
     const userModel = await this.prismaService.user.findFirst({
       where: { username },
-      include: include_roles,
+      include: include_roles_and_profile,
     });
+
+    console.log(userModel);
 
     return this.#map(userModel);
   }
@@ -95,12 +116,27 @@ export class UserMysqlRepository implements UserRepository {
   #map(userModel: UserModelMapper): User {
     const roles = userModel?.roles?.map((userRole) => Role[userRole.role.name]);
 
+    let profile = null;
+
+    if (userModel?.profile) {
+      profile = {
+        id: userModel?.profile?.id,
+        name: userModel?.profile?.name,
+        email: userModel?.profile?.email,
+        cell_phone: userModel?.profile?.cell_phone,
+        user_id: userModel?.profile?.user_id,
+        created_at: userModel?.profile?.created_at,
+        updated_at: userModel?.profile?.updated_at,
+      };
+    }
+
     return userModel
       ? new User({
           id: userModel.id,
           username: userModel.username,
           password: userModel.password,
           roles: roles,
+          profile,
           created_at: userModel.created_at,
           updated_at: userModel.updated_at,
         })

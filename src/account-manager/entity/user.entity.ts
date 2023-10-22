@@ -1,3 +1,4 @@
+import { Profile } from './profile.entity';
 import { Role } from './role.entity';
 import * as bcrypt from 'bcrypt';
 
@@ -8,6 +9,7 @@ export type UserProps = {
   created_at?: Date;
   updated_at?: Date;
   roles?: Role[];
+  profile: Profile;
 };
 
 export class User {
@@ -17,6 +19,7 @@ export class User {
   created_at?: Date;
   updated_at?: Date;
   roles?: Role[];
+  profile: Profile;
 
   constructor(props: UserProps) {
     this.id = props.id;
@@ -25,6 +28,7 @@ export class User {
     this.roles = props.roles;
     this.created_at = props.created_at;
     this.updated_at = props.updated_at;
+    this.profile = props.profile;
   }
 
   encrypt_password() {
