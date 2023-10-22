@@ -108,8 +108,6 @@ export class UserMysqlRepository implements UserRepository {
       include: include_roles_and_profile,
     });
 
-    console.log(userModel);
-
     return this.#map(userModel);
   }
 
