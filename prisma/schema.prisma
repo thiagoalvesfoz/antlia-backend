@@ -60,3 +60,109 @@ model Profile {
   @@index([id, name, email])
   @@map(name: "profiles")
 }
+
+model Category {
+  id         String    @id @default(uuid())
+  name       String    @unique
+  enable     Boolean   @default(true)
+  show_menu  Boolean   @default(false)
+  Product    Product[]
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now()) @updatedAt
+
+  @@index([name, id])
+  @@map(name: "categories")
+}
+
+model Product {
+  id           String      @id @default(uuid())
+  name         String      @unique
+  price        Decimal     @db.Decimal(9, 2)
+  availability Boolean     @default(true)
+  category     Category    @relation(fields: [category_id], references: [id])
+  category_id  String
+  image        Image?
+  created_at   DateTime    @default(now())
+  updated_at   DateTime    @default(now()) @updatedAt
+  OrderItem    OrderItem[]
+
+  @@index([name, id])
+  @@map(name: "products")
+}
+
+model Image {
+  id         String   @id @default(uuid())
+  bytes      Bytes?   @db.Blob
+  mimetype   String   @db.VarChar(15)
+  product    Product  @relation(fields: [product_id], references: [id])
+  product_id String   @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map(name: "categories_images")
+}
+
+model Order {
+  id            String       @id @default(uuid())
+  customer_id   String
+  customer_name String
+  total         Decimal      @db.Decimal(9, 2)
+  order_items   OrderItem[]
+  created_at    DateTime     @default(now())
+  Transaction   Transaction?
+
+  @@index([customer_id, id])
+  @@map(name: "orders")
+}
+
+model OrderItem {
+  id         String   @id @default(uuid())
+  product    Product  @relation(fields: [product_id], references: [id])
+  product_id String
+  Order      Order    @relation(fields: [order_id], references: [id])
+  order_id   String
+  quantity   Int
+  subtotal   Decimal  @db.Decimal(9, 2)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map(name: "orders_items")
+}
+
+model Transaction {
+  id         String   @id @default(uuid())
+  order      Order    @relation(fields: [order_id], references: [id])
+  order_id   String   @unique
+  invoice    Invoice  @relation(fields: [invoice_id], references: [id])
+  invoice_id String
+  price      Decimal  @db.Decimal(9, 2)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
+
+  @@map(name: "transactions")
+}
+
+model Invoice {
+  id           String        @id @default(uuid())
+  customer_id  String
+  bill_status  BillStatus
+  pay_status   PayStatus
+  total_paid   Decimal?      @db.Decimal(9, 2)
+  start_at     DateTime      @default(now())
+  end_at       DateTime?
+  transactions Transaction[]
+
+  @@index([customer_id, id])
+  @@map(name: "invoices")
+}
+
+enum BillStatus {
+  OPENDED
+  CLOSED
+}
+
+enum PayStatus {
+  SUCCEED
+  PENDING
+  FAILED
+}
