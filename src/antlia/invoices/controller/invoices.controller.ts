@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Request,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Request, Param } from '@nestjs/common';
 import { InvoicesService } from '../service/invoices.service';
 import { ApiTags } from '@nestjs/swagger';
 import { UserDto } from 'src/account-manager/dto/user-response.dto';
@@ -15,22 +8,20 @@ import { UserDto } from 'src/account-manager/dto/user-response.dto';
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
-  @Post('/close')
-  @HttpCode(HttpStatus.OK)
-  async findOne(@Request() req) {
-    const user: UserDto = req.user;
-
-    const invoice = await this.invoicesService.findOpenedInvoiceByCustomerId(
-      user.profile_id,
-    );
-
-    return this.invoicesService.closeInvoice(invoice);
-  }
-
-  // buscar a partir de um usuário autenticado
-  @Get('/current')
-  async getOpenedInvoice(@Request() req) {
+  @Post()
+  async createInvoiceOpened(@Request() req) {
     const user: UserDto = req.user;
     return this.invoicesService.findOpenedInvoiceByCustomerId(user.profile_id);
+  }
+
+  @Get('/')
+  async findInvoicesByCustomerID(@Request() req) {
+    const user: UserDto = req.user;
+    return this.invoicesService.findAllByCustomerId(user.profile_id);
+  }
+
+  @Get(':invoice_id')
+  async getMyInvoices(@Param('invoice_id') invoice_id: string) {
+    return this.invoicesService.findOne(invoice_id);
   }
 }

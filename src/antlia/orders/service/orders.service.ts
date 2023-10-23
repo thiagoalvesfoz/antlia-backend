@@ -14,7 +14,8 @@ export class OrdersService {
   constructor(
     @Inject('OrderRepository')
     private readonly orderRepository: OrderRepository,
-    private readonly productService: ProductsService, // private readonly invoicesService: InvoicesService,
+    private readonly productService: ProductsService,
+    private readonly invoicesService: InvoicesService,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, user: UserDto) {
@@ -50,7 +51,7 @@ export class OrdersService {
 
     const orderCreated = await this.orderRepository.create(order);
 
-    // this.invoicesService.addTransaction(orderCreated);
+    this.invoicesService.addTransaction(orderCreated);
 
     return orderCreated;
   }

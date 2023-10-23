@@ -6,6 +6,7 @@ import { InvoiceRepository } from '../repository/invoice.repository';
 import { BusinessRuleException } from 'src/@shared/business-rule.exception';
 import { ResourceNotFoundException } from 'src/@shared/resource-not-found.exception';
 import { Transaction } from '../entities/transaction.entity';
+import { InvoiceDto } from '../dto/invoice.dto';
 
 @Injectable()
 export class InvoicesService {
@@ -84,13 +85,52 @@ export class InvoicesService {
     return invoice;
   }
 
-  findAllByCustomerId(customer_id: string) {
-    return this.invoiceRepository.findAllByCustomerId(customer_id);
+  async findAllByCustomerId(customer_id: string) {
+    const invoices = await this.invoiceRepository.findAllByCustomerId(
+      customer_id,
+    );
+
+    const dto = invoices.map((invoice) => {
+      const invoiceDto = InvoiceDto.build({
+        id: invoice.id,
+        customer_id: invoice.customer_id,
+        bill_status: invoice.bill_status,
+        pay_status: invoice.pay_status,
+        start_at: invoice.start_at,
+        end_at: invoice.end_at,
+        total: this.#getTotalInvoice(invoice),
+      });
+
+      return invoiceDto;
+    });
+
+    return dto;
   }
 
-  findOne(invoice_id: string) {
-    const invoice = this.invoiceRepository.findById(invoice_id);
-    if (!invoice) throw new ResourceNotFoundException('Invoice');
-    return invoice;
+  async findOne(invoice_id: string) {
+    const invoice = await this.invoiceRepository.findById(invoice_id);
+
+    if (!invoice) {
+      throw new ResourceNotFoundException('Invoice not found');
+    }
+
+    return InvoiceDto.build({
+      id: invoice.id,
+      customer_id: invoice.customer_id,
+      bill_status: invoice.bill_status,
+      pay_status: invoice.pay_status,
+      start_at: invoice.start_at,
+      end_at: invoice.end_at,
+      total: this.#getTotalInvoice(invoice),
+      transactions: invoice.transactions,
+    });
+  }
+
+  #getTotalInvoice(invoice: Invoice) {
+    const total = invoice?.transactions?.reduce((acc, item) => {
+      return (acc += item.price);
+    }, 0);
+
+    return total;
   }
 }

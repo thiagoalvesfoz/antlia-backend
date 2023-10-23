@@ -50,11 +50,32 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
     return this.#map(invoiceModel);
   }
 
-  findAllByCustomerId(customer_id: string): Promise<Invoice[]> {
-    throw new Error('Method not implemented.');
+  async findAllByCustomerId(customer_id: string): Promise<Invoice[]> {
+    if (!customer_id) return;
+
+    const invoices = await this.prismaService.invoice.findMany({
+      where: {
+        customer_id,
+      },
+      orderBy: {
+        start_at: 'desc',
+      },
+      include: include_transactions,
+    });
+
+    return invoices.map(this.#map);
   }
-  findById(id: string): Promise<Invoice> {
-    throw new Error('Method not implemented.');
+  async findById(invoice_id: string): Promise<Invoice> {
+    if (!invoice_id) return;
+
+    const invoiceModel = await this.prismaService.invoice.findFirst({
+      where: {
+        id: invoice_id,
+      },
+      include: include_transactions,
+    });
+
+    return this.#map(invoiceModel);
   }
 
   async update(invoice: Invoice, transaction?: Transaction): Promise<Invoice> {
