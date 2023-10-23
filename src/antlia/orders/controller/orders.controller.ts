@@ -2,6 +2,8 @@ import { Controller, Get, Post, Body, Param, Request } from '@nestjs/common';
 import { OrdersService } from '../service/orders.service';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { Roles } from 'src/auth/decorator/role.decorator';
+import { Role } from 'src/account-manager/entity/role.entity';
 
 @ApiTags('Orders')
 @Controller('orders')
@@ -14,6 +16,7 @@ export class OrdersController {
   }
 
   @Get()
+  @Roles(Role.ADMIN)
   findAll() {
     return this.ordersService.findAll();
   }

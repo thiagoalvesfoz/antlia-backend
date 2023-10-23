@@ -57,12 +57,12 @@ export class OrdersService {
   }
 
   async findAll() {
-    return this.orderRepository.findAll();
+    return await this.orderRepository.findAll();
   }
 
   async findOne(id: string) {
-    const order = this.orderRepository.findById(id);
-    if (!order) throw new ResourceNotFoundException('Order');
+    const order = await this.orderRepository.findById(id);
+    if (!order) throw new ResourceNotFoundException('Order not found');
     return order;
   }
 }
