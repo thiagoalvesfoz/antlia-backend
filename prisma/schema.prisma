@@ -56,6 +56,7 @@ model Profile {
   user_id    String?  @unique
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
+  Order      Order[]
 
   @@index([id, name, email])
   @@map(name: "profiles")
@@ -103,13 +104,13 @@ model Image {
 }
 
 model Order {
-  id            String       @id @default(uuid())
-  customer_id   String
-  customer_name String
-  total         Decimal      @db.Decimal(9, 2)
-  order_items   OrderItem[]
-  created_at    DateTime     @default(now())
-  Transaction   Transaction?
+  id          String       @id @default(uuid())
+  customer    Profile      @relation(fields: [customer_id], references: [id])
+  customer_id String
+  total       Decimal      @db.Decimal(9, 2)
+  order_items OrderItem[]
+  created_at  DateTime     @default(now())
+  Transaction Transaction?
 
   @@index([customer_id, id])
   @@map(name: "orders")

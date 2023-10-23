@@ -5,6 +5,8 @@ import { Order } from '../entities/order.entity';
 import { OrderItem } from '../entities/orderItem.entity';
 import { OrderRepository } from '../repository/order.repository';
 import { ResourceNotFoundException } from 'src/@shared/resource-not-found.exception';
+import { UserDto } from 'src/account-manager/dto/user-response.dto';
+import { BusinessRuleException } from 'src/@shared/business-rule.exception';
 
 @Injectable()
 export class OrdersService {
@@ -14,12 +16,18 @@ export class OrdersService {
     private readonly productService: ProductsService, // private readonly invoicesService: InvoicesService,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto) {
-    const { customer_id, customer_name, order_items } = createOrderDto;
+  async create(createOrderDto: CreateOrderDto, user: UserDto) {
+    const { order_items } = createOrderDto;
+
+    if (!user) {
+      throw new BusinessRuleException(
+        'The order could not be placed because the customer was not informed',
+      );
+    }
 
     const order = new Order({
-      customer_id,
-      customer_name,
+      customer_id: user.profile_id,
+      customer_name: user.name,
     });
 
     for (const index in order_items) {

@@ -20,6 +20,10 @@ type OrderModelProps = OrderModel & {
     quantity: number;
     subtotal: Decimal;
   }[];
+  customer: {
+    id: string;
+    name: string;
+  };
 };
 
 @Injectable()
@@ -29,8 +33,6 @@ export class OrderMysqlRepository implements OrderRepository {
   async create(order: Order): Promise<Order> {
     const orderModel = await this.prismaService.order.create({
       data: {
-        customer_id: order.customer_id,
-        customer_name: order.customer_name,
         total: order.total,
         order_items: {
           create: order.order_items.map((item) => ({
@@ -38,6 +40,11 @@ export class OrderMysqlRepository implements OrderRepository {
             quantity: item.quantity,
             subtotal: item.subtotal,
           })),
+        },
+        customer: {
+          connect: {
+            id: order.customer_id,
+          },
         },
       },
       include: {
@@ -59,6 +66,12 @@ export class OrderMysqlRepository implements OrderRepository {
             subtotal: true,
           },
         },
+        customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
       },
     });
 
@@ -67,6 +80,12 @@ export class OrderMysqlRepository implements OrderRepository {
   async findAll(): Promise<Order[]> {
     const orders = await this.prismaService.order.findMany({
       include: {
+        customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         order_items: {
           select: {
             id: true,
@@ -99,6 +118,12 @@ export class OrderMysqlRepository implements OrderRepository {
         id: order_id,
       },
       include: {
+        customer: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
         order_items: {
           select: {
             id: true,
@@ -127,8 +152,8 @@ export class OrderMysqlRepository implements OrderRepository {
     return orderModel
       ? new Order({
           id: orderModel.id,
-          customer_id: orderModel.customer_id,
-          customer_name: orderModel.customer_name,
+          customer_id: orderModel.customer.id,
+          customer_name: orderModel.customer.name,
           total: +orderModel.total,
           created_at: orderModel.created_at,
           order_items: orderModel.order_items.map(
