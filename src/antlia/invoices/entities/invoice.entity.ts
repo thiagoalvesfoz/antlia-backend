@@ -2,14 +2,14 @@ import { BusinessRuleException } from 'src/@shared/business-rule.exception';
 import { Transaction } from './transaction.entity';
 
 export enum BillStatus {
-  OPENDED,
-  CLOSED,
+  OPENDED = 'OPENDED',
+  CLOSED = 'CLOSED',
 }
 
 export enum PayStatus {
-  SUCCEED,
-  PENDING,
-  FAILED,
+  SUCCEED = 'SUCCEED',
+  PENDING = 'PENDING',
+  FAILED = 'FAILED',
 }
 
 type InvoiceProps = {
@@ -42,7 +42,7 @@ export class Invoice {
     this.transactions = props.transactions || [];
   }
 
-  addItem(order: Transaction) {
+  addTransaction(order: Transaction) {
     this.transactions.push(order);
   }
 

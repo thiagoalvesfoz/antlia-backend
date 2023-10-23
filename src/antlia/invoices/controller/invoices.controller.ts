@@ -2,51 +2,35 @@ import {
   Controller,
   Get,
   Post,
-  Body,
-  Param,
-  Query,
-  BadRequestException,
+  Request,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import { InvoicesService } from '../service/invoices.service';
-import { CreateInvoiceDto } from '../dto/create-invoice.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { UserDto } from 'src/account-manager/dto/user-response.dto';
 
 @ApiTags('Invoices')
 @Controller('invoices')
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
-  @Post('open-invoice')
-  openInvoice(@Body() createInvoiceDto: CreateInvoiceDto) {
-    return this.invoicesService.openInvoice(createInvoiceDto);
-  }
+  @Post('/close')
+  @HttpCode(HttpStatus.OK)
+  async findOne(@Request() req) {
+    const user: UserDto = req.user;
 
-  @Post(':id/close')
-  async findOne(@Param('id') id: string) {
-    const invoice = await this.invoicesService.findOne(id);
+    const invoice = await this.invoicesService.findOpenedInvoiceByCustomerId(
+      user.profile_id,
+    );
+
     return this.invoicesService.closeInvoice(invoice);
   }
 
   // buscar a partir de um usuário autenticado
   @Get('/current')
-  async getOpenedInvoice(@Query() params: any) {
-    const { customer_id } = params;
-
-    if (!customer_id) {
-      throw new BadRequestException('?customer_id= is required');
-    }
-
-    return this.invoicesService.findOpenedInvoiceByCustomerId(customer_id);
-  }
-
-  @Get()
-  findAll(@Query() params: any) {
-    const { customer_id } = params;
-
-    if (!customer_id) {
-      throw new BadRequestException('?customer_id= is required');
-    }
-
-    return this.invoicesService.findAllByCustomerId(customer_id);
+  async getOpenedInvoice(@Request() req) {
+    const user: UserDto = req.user;
+    return this.invoicesService.findOpenedInvoiceByCustomerId(user.profile_id);
   }
 }

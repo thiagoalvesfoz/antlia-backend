@@ -8,5 +8,6 @@ import { OrderRepositoryProvider } from './repository';
   imports: [InventoryModule],
   controllers: [OrdersController],
   providers: [OrdersService, OrderRepositoryProvider],
+  exports: [OrdersService],
 })
 export class OrdersModule {}

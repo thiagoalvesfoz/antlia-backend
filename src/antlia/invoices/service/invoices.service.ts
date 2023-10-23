@@ -5,6 +5,7 @@ import { BillStatus, Invoice, PayStatus } from '../entities/invoice.entity';
 import { InvoiceRepository } from '../repository/invoice.repository';
 import { BusinessRuleException } from 'src/@shared/business-rule.exception';
 import { ResourceNotFoundException } from 'src/@shared/resource-not-found.exception';
+import { Transaction } from '../entities/transaction.entity';
 
 @Injectable()
 export class InvoicesService {
@@ -15,6 +16,10 @@ export class InvoicesService {
 
   // must not have create a new invoice if already invoice exists with opended status
   async openInvoice(createInvoiceDto: CreateInvoiceDto) {
+    if (!createInvoiceDto?.customer_id) {
+      throw new BusinessRuleException('customer_id is required');
+    }
+
     const existsInvoice =
       await this.invoiceRepository.findOpenedInvoiceByCustomerId(
         createInvoiceDto.customer_id,
@@ -44,20 +49,28 @@ export class InvoicesService {
     return await this.invoiceRepository.update(invoice);
   }
 
+  // transaction
   async addTransaction(order: Order) {
-    const invoice = await this.findOpenedInvoiceByCustomerId(order.customer_id);
+    const { customer_id, id, total } = order;
 
-    invoice.addItem({
-      order_id: order.id,
-      price: order.getTotal(),
-      created_at: new Date(),
+    const invoice = await this.openInvoice({ customer_id });
+
+    const transaction = new Transaction({
+      order_id: id,
+      price: total,
     });
 
-    await this.invoiceRepository.update(invoice);
+    invoice.addTransaction(transaction);
+
+    await this.invoiceRepository.update(invoice, transaction);
   }
 
   //Is used to find in database a invoice with opened status from client
   async findOpenedInvoiceByCustomerId(customer_id: string) {
+    if (!customer_id) {
+      throw new BusinessRuleException('customer_id is required');
+    }
+
     let invoice = await this.invoiceRepository.findOpenedInvoiceByCustomerId(
       customer_id,
     );
@@ -65,7 +78,6 @@ export class InvoicesService {
     if (!invoice) {
       invoice = await this.openInvoice({
         customer_id: customer_id,
-        customer_name: '',
       });
     }
 
