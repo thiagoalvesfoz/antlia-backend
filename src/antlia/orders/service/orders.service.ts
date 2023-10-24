@@ -53,7 +53,7 @@ export class OrdersService {
 
     const orderCreated = await this.orderRepository.create(order);
 
-    this.eventEmitter.emit('order.created', new OrderCreatedEvent(orderCreated))
+    this.eventEmitter.emit('order.created', new OrderCreatedEvent(orderCreated));
 
     return orderCreated;
   }
