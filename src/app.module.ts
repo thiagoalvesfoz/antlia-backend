@@ -5,6 +5,7 @@ import { AntliaModule } from './antlia/antlia.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggerMiddleware } from './prisma/logger.middleware';
 import { BillingModule } from './billing/billing.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { BillingModule } from './billing/billing.module';
     AntliaModule,
     AuthModule,
     BillingModule,
+    EventEmitterModule.forRoot()
   ],
   controllers: [],
   providers: [],

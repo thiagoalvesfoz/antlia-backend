@@ -19,12 +19,43 @@ type OrderModelProps = OrderModel & {
     };
     quantity: number;
     subtotal: Decimal;
+    created_at: Date;
+    updated_at: Date;
   }[];
   customer: {
     id: string;
     name: string;
   };
 };
+
+const include = {
+  order_items: {
+    select: {
+      id: true,
+      product_id: true,
+      product: {
+        select: {
+          name: true,
+          category: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      },
+      quantity: true,
+      subtotal: true,
+      created_at: true,
+      updated_at: true
+    },
+  },
+  customer: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+}
 
 @Injectable()
 export class OrderMysqlRepository implements OrderRepository {
@@ -47,64 +78,14 @@ export class OrderMysqlRepository implements OrderRepository {
           },
         },
       },
-      include: {
-        order_items: {
-          select: {
-            id: true,
-            product_id: true,
-            product: {
-              select: {
-                name: true,
-                category: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
-            quantity: true,
-            subtotal: true,
-          },
-        },
-        customer: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-      },
+      include
     });
 
     return this.#map(orderModel);
   }
   async findAll(): Promise<Order[]> {
     const orders = await this.prismaService.order.findMany({
-      include: {
-        customer: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        order_items: {
-          select: {
-            id: true,
-            product_id: true,
-            product: {
-              select: {
-                name: true,
-                category: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
-            quantity: true,
-            subtotal: true,
-          },
-        },
-      },
+      include
     });
 
     return orders.map(this.#map);
@@ -117,32 +98,7 @@ export class OrderMysqlRepository implements OrderRepository {
       where: {
         id: order_id,
       },
-      include: {
-        customer: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        order_items: {
-          select: {
-            id: true,
-            product_id: true,
-            product: {
-              select: {
-                name: true,
-                category: {
-                  select: {
-                    name: true,
-                  },
-                },
-              },
-            },
-            quantity: true,
-            subtotal: true,
-          },
-        },
-      },
+      include
     });
 
     return this.#map(order);
@@ -159,10 +115,11 @@ export class OrderMysqlRepository implements OrderRepository {
           order_items: orderModel.order_items.map(
             (orderItems) =>
               new OrderItem({
+                id: orderItems.id,
                 product_id: orderItems.product_id,
                 product_name: orderItems.product.name,
                 quantity: orderItems.quantity,
-                subtotal: +orderItems.subtotal,
+                subtotal: +orderItems.subtotal
               }),
           ),
         })

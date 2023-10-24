@@ -3,18 +3,14 @@ import { OrdersService } from './service/orders.service';
 import { OrdersController } from './controller/orders.controller';
 import { InventoryModule } from 'src/antlia/inventory/inventory.module';
 import { OrderRepositoryProvider } from './repository';
-import { InvoicesService } from '../../billing/invoices/service/invoices.service';
-import {
-  CustomerRepositoryProvider,
-  InvoiceRepositoryProvider,
-} from '../../billing/invoices/repository';
-import { CustomerService } from 'src/billing/invoices/service/customer.service';
-import { BillingModule } from 'src/billing/billing.module';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+const EventProvider = { provide: 'EventEmitter', useExisting: EventEmitter2 }
 
 @Module({
-  imports: [InventoryModule, BillingModule],
+  imports: [InventoryModule],
   controllers: [OrdersController],
-  providers: [OrdersService, OrderRepositoryProvider],
+  providers: [OrdersService, OrderRepositoryProvider, EventProvider],
   exports: [OrdersService],
 })
 export class OrdersModule {}

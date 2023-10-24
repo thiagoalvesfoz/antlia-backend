@@ -1,13 +1,14 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { CreateOrderDto } from '../dto/create-order.dto';
-import { ProductsService } from '../../inventory/service/products.service';
-import { Order } from '../entities/order.entity';
-import { OrderItem } from '../entities/orderItem.entity';
-import { OrderRepository } from '../repository/order.repository';
 import { ResourceNotFoundException } from 'src/@shared/resource-not-found.exception';
-import { UserDto } from 'src/account-manager/dto/user-response.dto';
 import { BusinessRuleException } from 'src/@shared/business-rule.exception';
-import { InvoicesService } from 'src/billing/invoices/service/invoices.service';
+import { OrderRepository } from '../repository/order.repository';
+import { ProductsService } from '../../inventory/service/products.service';
+import { OrderCreatedEvent } from 'src/antlia/events/order-created.event';
+import { CreateOrderDto } from '../dto/create-order.dto';
+import { OrderItem } from '../entities/orderItem.entity';
+import { UserDto } from 'src/account-manager/dto/user-response.dto';
+import { Order } from '../entities/order.entity';
+import EventEmitter from 'events';
 
 @Injectable()
 export class OrdersService {
@@ -15,7 +16,8 @@ export class OrdersService {
     @Inject('OrderRepository')
     private readonly orderRepository: OrderRepository,
     private readonly productService: ProductsService,
-    private readonly invoicesService: InvoicesService,
+    @Inject('EventEmitter')
+    private readonly eventEmitter: EventEmitter,
   ) {}
 
   async create(createOrderDto: CreateOrderDto, user: UserDto) {
@@ -51,7 +53,7 @@ export class OrdersService {
 
     const orderCreated = await this.orderRepository.create(order);
 
-    this.invoicesService.addTransaction(orderCreated);
+    this.eventEmitter.emit('order.created', new OrderCreatedEvent(orderCreated))
 
     return orderCreated;
   }

@@ -1,11 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateInvoiceDto } from '../dto/create-invoice.dto';
-import { Order } from 'src/antlia/orders/entities/order.entity';
 import { Invoice } from '../entities/invoice.entity';
 import { InvoiceRepository } from '../repository/invoice.repository';
 import { BusinessRuleException } from 'src/@shared/business-rule.exception';
 import { ResourceNotFoundException } from 'src/@shared/resource-not-found.exception';
-import { Transaction } from '../entities/transaction.entity';
 import { InvoiceDto } from '../dto/invoice.dto';
 
 import { CustomerService } from './customer.service';
@@ -24,12 +21,12 @@ export class InvoicesService {
   ) {}
 
   async getOpenInvoice(customer_id: string) {
-    const invoice = await this.#getOrCreateOpenInvoice(customer_id);
+    const invoice = await this.getOrCreateOpenInvoice(customer_id);
     return this.#mapInvoiceDto({ invoice, withTransactions: false });
   }
 
   // RESPONSÁVEL POR PEGAR OU CRIAR UMA FATURA EM ABERTO
-  async #getOrCreateOpenInvoice(customer_id: string) {
+  async getOrCreateOpenInvoice(customer_id: string) {
     const customer = await this.customerService.getCustomer(customer_id);
 
     let openInvoice = await this.invoiceRepository.findOpenInvoiceByCustomerId(
@@ -53,22 +50,6 @@ export class InvoicesService {
     invoice.close();
 
     return await this.invoiceRepository.update(invoice);
-  }
-
-  // transaction
-  async addTransaction(order: Order) {
-    const { customer_id, id, total } = order;
-
-    const invoice = await this.#getOrCreateOpenInvoice(customer_id);
-
-    const transaction = new Transaction({
-      order_id: id,
-      price: total,
-    });
-
-    invoice.addTransaction(transaction);
-
-    await this.invoiceRepository.update(invoice, transaction);
   }
 
   async findAllInvoicesByCustomerId(customer_id: string) {

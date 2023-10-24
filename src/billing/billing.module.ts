@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { InvoiceModule } from './invoices/invoice.module';
 import { RouterModule } from '@nestjs/core';
+import { OrderCreatedListener } from './listeners/order-created.listener';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { RouterModule } from '@nestjs/core';
     ]),
   ],
   controllers: [],
-  providers: [],
+  providers: [OrderCreatedListener],
   exports: [InvoiceModule],
 })
 export class BillingModule {}
