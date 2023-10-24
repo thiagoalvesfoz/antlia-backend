@@ -1,5 +1,8 @@
 import { BusinessRuleException } from 'src/@shared/business-rule.exception';
 import { Transaction } from './transaction.entity';
+import { getInvoiceClosingDate } from 'src/billing/settings/settings.billing';
+import { Customer } from './customer.entity';
+import { InvalidAttributeException } from 'src/@shared/invalid-attribute-exception';
 
 export enum BillStatus {
   OPENDED = 'OPENDED',
@@ -7,9 +10,10 @@ export enum BillStatus {
 }
 
 export enum PayStatus {
-  SUCCEED = 'SUCCEED',
+  PAID = 'SUCCEED',
   PENDING = 'PENDING',
-  FAILED = 'FAILED',
+  PARTLY_PAID = 'PARTLY_PAID',
+  CANCELED = 'CANCELED',
 }
 
 type InvoiceProps = {
@@ -53,5 +57,23 @@ export class Invoice {
 
     this.bill_status = BillStatus.CLOSED;
     this.end_at = new Date();
+  }
+
+  static openInvoice(customer: Customer) {
+    if (!customer?.id) {
+      throw new BusinessRuleException(
+        'Cannot open invoice without specifying a customer',
+      );
+    }
+
+    const today = new Date();
+
+    return new Invoice({
+      customer_id: customer.id,
+      bill_status: BillStatus.OPENDED,
+      pay_status: PayStatus.PENDING,
+      start_at: today,
+      end_at: getInvoiceClosingDate(today),
+    });
   }
 }

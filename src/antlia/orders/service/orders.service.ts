@@ -7,7 +7,7 @@ import { OrderRepository } from '../repository/order.repository';
 import { ResourceNotFoundException } from 'src/@shared/resource-not-found.exception';
 import { UserDto } from 'src/account-manager/dto/user-response.dto';
 import { BusinessRuleException } from 'src/@shared/business-rule.exception';
-import { InvoicesService } from 'src/antlia/invoices/service/invoices.service';
+import { InvoicesService } from 'src/billing/invoices/service/invoices.service';
 
 @Injectable()
 export class OrdersService {

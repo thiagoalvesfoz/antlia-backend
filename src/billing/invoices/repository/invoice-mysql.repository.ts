@@ -43,6 +43,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
         bill_status: BillStatusModel[invoice.bill_status],
         pay_status: PayStatusModel[invoice.pay_status],
         start_at: invoice.start_at,
+        end_at: invoice.end_at,
       },
       include: include_transactions,
     });
@@ -100,7 +101,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
 
     return this.#map(invoiceModel);
   }
-  async findOpenedInvoiceByCustomerId(customer_id: string): Promise<Invoice> {
+  async findOpenInvoiceByCustomerId(customer_id: string): Promise<Invoice> {
     if (!customer_id) return;
 
     const invoiceModel = await this.prismaService.invoice.findFirst({
@@ -108,7 +109,6 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
         customer_id,
         bill_status: BillStatusModel.OPENDED,
         pay_status: PayStatusModel.PENDING,
-        end_at: null,
       },
       include: include_transactions,
     });

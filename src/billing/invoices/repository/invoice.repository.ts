@@ -8,5 +8,5 @@ export interface InvoiceRepository {
   findById(id: string): Promise<Invoice>;
   create(invoice: Invoice): Promise<Invoice>;
   update(invoice: Invoice, transaction?: Transaction): Promise<Invoice>;
-  findOpenedInvoiceByCustomerId(customer_id: string): Promise<Invoice>;
+  findOpenInvoiceByCustomerId(customer_id: string): Promise<Invoice>;
 }

@@ -163,7 +163,8 @@ enum BillStatus {
 }
 
 enum PayStatus {
-  SUCCEED
+  PAID
   PENDING
-  FAILED
+  PARTLY_PAID
+  CANCELED
 }

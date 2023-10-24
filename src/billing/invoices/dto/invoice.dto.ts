@@ -1,4 +1,4 @@
-import { BillStatus, PayStatus } from '@prisma/client';
+import { BillStatus, PayStatus } from '../entities/invoice.entity';
 import { Transaction } from '../entities/transaction.entity';
 
 type InvoiceDtoProps = {

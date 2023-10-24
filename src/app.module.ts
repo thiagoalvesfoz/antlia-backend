@@ -4,9 +4,16 @@ import { AuthModule } from './auth/auth.module';
 import { AntliaModule } from './antlia/antlia.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { LoggerMiddleware } from './prisma/logger.middleware';
+import { BillingModule } from './billing/billing.module';
 
 @Module({
-  imports: [PrismaModule, AccountManagerModule, AntliaModule, AuthModule],
+  imports: [
+    PrismaModule,
+    AccountManagerModule,
+    AntliaModule,
+    AuthModule,
+    BillingModule,
+  ],
   controllers: [],
   providers: [],
 })

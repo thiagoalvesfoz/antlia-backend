@@ -16,7 +16,7 @@ export class InvoiceMemoryRepository implements InvoiceRepository {
   update(invoice: Invoice): Promise<Invoice> {
     throw new Error('Method not implemented.');
   }
-  findOpenedInvoiceByCustomerId(customer_id: string): Promise<Invoice> {
+  findOpenInvoiceByCustomerId(customer_id: string): Promise<Invoice> {
     throw new Error('Method not implemented.');
   }
 }
