@@ -6,10 +6,12 @@ import {
   Param,
   HttpCode,
   HttpStatus,
+  Body,
 } from '@nestjs/common';
 import { InvoicesService } from '../service/invoices.service';
 import { ApiTags } from '@nestjs/swagger';
 import { UserDto } from 'src/account-manager/dto/user-response.dto';
+import { UpdateInvoiceDto } from '../dto/update-invoice.dto';
 
 @ApiTags('Invoices')
 @Controller('invoices')
@@ -32,5 +34,10 @@ export class InvoicesController {
   @Get(':invoice_id')
   async getMyInvoices(@Param('invoice_id') invoice_id: string) {
     return this.invoicesService.findInvoiceById(invoice_id);
+  }
+
+  @Get(':invoice_id')
+  async updateInvoice(@Param('invoice_id') invoice_id: string, @Body() invoiceDto: UpdateInvoiceDto) {
+    return this.invoicesService.updateInvoice(invoice_id, invoiceDto);
   }
 }

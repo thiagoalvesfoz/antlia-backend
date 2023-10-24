@@ -6,6 +6,7 @@ import { ResourceNotFoundException } from 'src/@shared/resource-not-found.except
 import { InvoiceDto } from '../dto/invoice.dto';
 
 import { CustomerService } from './customer.service';
+import { UpdateInvoiceDto } from '../dto/update-invoice.dto';
 
 type GetInvoiceDto = {
   invoice: Invoice;
@@ -14,6 +15,7 @@ type GetInvoiceDto = {
 
 @Injectable()
 export class InvoicesService {
+
   constructor(
     @Inject('InvoiceRepository')
     private readonly invoiceRepository: InvoiceRepository,
@@ -40,6 +42,20 @@ export class InvoicesService {
     }
 
     return openInvoice;
+  }
+
+  async updateInvoice(invoice_id: string, invoiceDto: UpdateInvoiceDto) {
+    const invoice = await this.invoiceRepository.findById(invoice_id);
+
+    if (!invoice) {
+      throw new ResourceNotFoundException('Invoice not found');
+    }
+
+    invoice.pay(invoiceDto.total_paid);
+
+    const invoiceUpdated = await this.invoiceRepository.update(invoice);
+
+    return this.#mapInvoiceDto({ invoice: invoiceUpdated, withTransactions: false })
   }
 
   async closeInvoice(invoice: Invoice): Promise<Invoice> {
@@ -74,13 +90,6 @@ export class InvoicesService {
     return this.#mapInvoiceDto({ invoice });
   }
 
-  #getTotalInvoice(invoice: Invoice) {
-    const total = invoice?.transactions?.reduce((acc, item) => {
-      return (acc += item.price);
-    }, 0);
-
-    return total;
-  }
 
   #mapInvoiceDto({ invoice, withTransactions = true }: GetInvoiceDto) {
     return InvoiceDto.build({
@@ -90,7 +99,8 @@ export class InvoicesService {
       pay_status: invoice.pay_status,
       start_at: invoice.start_at,
       end_at: invoice.end_at,
-      total: this.#getTotalInvoice(invoice),
+      total_paid: invoice.total_paid,
+      total: invoice.getTotal(),
       transactions: withTransactions ? invoice.transactions : undefined,
     });
   }

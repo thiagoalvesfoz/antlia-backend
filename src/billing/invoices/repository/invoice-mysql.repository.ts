@@ -125,6 +125,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
           customer_id: invoiceModel.customer_id,
           bill_status: BillStatus[invoiceModel.bill_status],
           pay_status: PayStatus[invoiceModel.pay_status],
+          total_paid: +invoiceModel.total_paid,
           transactions: invoiceModel.transactions?.map(
             (transaction) =>
               new Transaction({

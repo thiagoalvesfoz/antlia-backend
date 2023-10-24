@@ -9,6 +9,7 @@ type InvoiceDtoProps = {
   start_at: Date;
   end_at: Date;
   total: number;
+  total_paid: number;
   transactions?: Transaction[];
 };
 
@@ -20,6 +21,7 @@ export class InvoiceDto {
   start_at: Date;
   end_at?: Date;
   total: number;
+  total_paid?: number;
   transactions?: Transaction[];
 
   constructor(props: InvoiceDtoProps) {
@@ -29,6 +31,7 @@ export class InvoiceDto {
     this.pay_status = props.pay_status;
     this.start_at = props.start_at;
     this.end_at = props.end_at;
+    this.total_paid = props.total_paid || 0;
     this.total = props.total;
     this.transactions = props.transactions;
   }
