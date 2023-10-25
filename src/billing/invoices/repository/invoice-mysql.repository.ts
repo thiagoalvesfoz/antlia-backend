@@ -11,7 +11,7 @@ import { Transaction } from '../entities/transaction.entity';
 import { Injectable } from '@nestjs/common';
 
 type InvoiceModelProps = InvoiceModel & {
-  transactions: {
+  transactions?: {
     id: string;
     price: Decimal;
     order_id: string;
@@ -116,6 +116,34 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
     return this.#map(invoiceModel);
   }
 
+  async countInvoiceOpenedByEndAt(date: Date) {
+    const count = await this.prismaService.invoice.count({
+      where: {
+        bill_status: BillStatus.OPENDED,
+        end_at: date
+      }
+    })
+
+    return count;
+  }
+
+  async getInvoicesOpenedByEndAt(date: Date): Promise<Invoice[]> {
+    const invoiceModel = await this.prismaService.invoice.findMany({
+      where: {
+        end_at: date,
+        bill_status: BillStatus.OPENDED
+      }
+    })
+
+    return invoiceModel.map(this.#map);
+  }
+
+  async updateAll(invoices: Invoice[]) {
+    await this.prismaService.invoice.updateMany({
+      data: invoices
+    })
+  }
+
   #map(invoiceModel: InvoiceModelProps) {
     return invoiceModel
       ? new Invoice({
@@ -134,7 +162,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
                 price: +transaction.price,
                 created_at: transaction.created_at,
               }),
-          ),
+          ) || [],
         })
       : undefined;
   }

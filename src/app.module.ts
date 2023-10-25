@@ -7,6 +7,8 @@ import { LoggerMiddleware } from './prisma/logger.middleware';
 import { BillingModule } from './billing/billing.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { MailModule } from './mail/mail.module';
+import { TasksModule } from './tasks/tasks.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -16,7 +18,9 @@ import { MailModule } from './mail/mail.module';
     AuthModule,
     BillingModule,
     MailModule,
+    TasksModule,
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot()
   ],
   controllers: [],
   providers: [],
