@@ -9,7 +9,7 @@ export enum BillStatus {
 }
 
 export enum PayStatus {
-  PAID = 'SUCCEED',
+  PAID = 'PAID',
   PENDING = 'PENDING',
   PARTLY_PAID = 'PARTLY_PAID',
   CANCELED = 'CANCELED',
