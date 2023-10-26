@@ -5,6 +5,9 @@
   "author": "",
   "private": true,
   "license": "UNLICENSED",
+  "prisma": {
+    "seed": "ts-node src/prisma/seeds.ts"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -31,6 +34,7 @@
     "@nestjs/mapped-types": "^2.0.2",
     "@nestjs/passport": "^10.0.2",
     "@nestjs/platform-express": "^10.0.0",
+    "@nestjs/schedule": "^4.0.0",
     "@nestjs/swagger": "^7.1.13",
     "@prisma/client": "5.4.2",
     "@types/bcrypt": "^5.0.1",
@@ -40,6 +44,7 @@
     "dayjs": "^1.11.10",
     "handlebars": "^4.7.8",
     "moment": "^2.29.4",
+    "moment-timezone": "^0.5.43",
     "nodemailer": "^6.9.7",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.1",
