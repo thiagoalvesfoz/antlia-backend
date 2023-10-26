@@ -25,6 +25,7 @@ import { UpdateProductDto } from '../dto/update-product.dto';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from 'src/account-manager/entity/role.entity';
 import { ApiTags } from '@nestjs/swagger';
+import { Public } from 'src/auth/decorator/public.decorator';
 
 @ApiTags('Products')
 @Controller('products')
@@ -84,6 +85,7 @@ export class ProductsController {
     await this.productsService.uploadImage(product_id, file);
   }
 
+  @Public()
   @Get(':product_id/image')
   async getFile(
     @Param('product_id') product_id: string,
