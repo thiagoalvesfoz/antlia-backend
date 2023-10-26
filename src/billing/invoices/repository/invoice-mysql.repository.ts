@@ -66,6 +66,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
 
     return invoices.map(this.#map);
   }
+
   async findById(invoice_id: string): Promise<Invoice> {
     if (!invoice_id) return;
 
@@ -101,6 +102,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
 
     return this.#map(invoiceModel);
   }
+  
   async findOpenInvoiceByCustomerId(customer_id: string): Promise<Invoice> {
     if (!customer_id) return;
 
@@ -116,7 +118,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
     return this.#map(invoiceModel);
   }
 
-  async countInvoiceOpenedByEndAt(date: Date) {
+  async countInvoiceOpenedByEndAt(date: string) {
     const count = await this.prismaService.invoice.count({
       where: {
         bill_status: BillStatus.OPENDED,
@@ -127,7 +129,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
     return count;
   }
 
-  async getInvoicesOpenedByEndAt(date: Date): Promise<Invoice[]> {
+  async getInvoicesOpenedByEndAt(date: string): Promise<Invoice[]> {
     const invoiceModel = await this.prismaService.invoice.findMany({
       where: {
         end_at: date,
@@ -138,9 +140,15 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
     return invoiceModel.map(this.#map);
   }
 
-  async updateAll(invoices: Invoice[]) {
-    await this.prismaService.invoice.updateMany({
-      data: invoices
+  async closeInvoice(invoices: Invoice) {
+    await this.prismaService.invoice.update({
+      where: {
+        id: invoices.id
+      },
+      data: {
+        bill_status: invoices.bill_status,
+        end_at: invoices.end_at,
+      },
     })
   }
 

@@ -1,6 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { InvoiceRepository } from 'src/billing/invoices/repository';
+import { Cron } from '@nestjs/schedule';
+import * as moment from 'moment-timezone';
+
+const EVERY_DAY_AT_12_AM = "0 0 * * *";
 
 @Injectable()
 export class InvoiceClosingTaskService {
@@ -11,26 +14,24 @@ export class InvoiceClosingTaskService {
     private readonly invoiceRepository: InvoiceRepository,
   ) {}
 
-  // @Cron(CronExpression.EVERY_DAY_AT_1AM)
-  @Cron(CronExpression.EVERY_10_SECONDS)
-  async handleCron() {
-    const today = new Date()
 
-    console.log(today)
+  @Cron(EVERY_DAY_AT_12_AM)
+  async handleCron() {
+    this.logger.log('task started');
+
+    const today = moment().tz('GMT').format('YYYY-11-20T00:00:00Z');
 
     const invoiceAmmout = await this.invoiceRepository.countInvoiceOpenedByEndAt(today);
 
-    console.log("total invoices", invoiceAmmout)
+    if (invoiceAmmout > 0) {
+      const invoices = await this.invoiceRepository.getInvoicesOpenedByEndAt(today);
 
-    if (invoiceAmmout === 0) return;
-
-    console.log("get invoices")
-    const invoices = await this.invoiceRepository.getInvoicesOpenedByEndAt(today);
-
-    for (const index in invoices) {
-      invoices[index].close()
+      for (const index in invoices) {
+        invoices[index].close();
+        this.invoiceRepository.closeInvoice(invoices[index]);
+      }
     }
 
-    this.invoiceRepository.updateAll(invoices);
+    this.logger.log('task finalized');
   }
 }

@@ -149,8 +149,8 @@ model Invoice {
   bill_status  BillStatus
   pay_status   PayStatus
   total_paid   Decimal?      @db.Decimal(9, 2)
-  start_at     DateTime      @default(now())
-  end_at       DateTime?
+  start_at     DateTime      @db.Date
+  end_at       DateTime      @db.Date
   transactions Transaction[]
 
   @@index([customer_id, id])

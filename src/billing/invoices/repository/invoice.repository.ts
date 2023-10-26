@@ -9,7 +9,7 @@ export interface InvoiceRepository {
   create(invoice: Invoice): Promise<Invoice>;
   update(invoice: Invoice, transaction?: Transaction): Promise<Invoice>;
   findOpenInvoiceByCustomerId(customer_id: string): Promise<Invoice>;
-  countInvoiceOpenedByEndAt(date: Date): Promise<number>
-  getInvoicesOpenedByEndAt(date: Date): Promise<Invoice[]>
-  updateAll(invoices: Invoice[]): Promise<void>
+  countInvoiceOpenedByEndAt(date: string): Promise<number>
+  getInvoicesOpenedByEndAt(date: string): Promise<Invoice[]>
+  closeInvoice(invoices: Invoice): Promise<void>
 }
