@@ -1,0 +1,10 @@
+.github/
+.git/
+dist/
+node_modules/
+docker-compose.yml
+docker-compose-deploy.yml
+Dockerfile
+Dockerfile.prod
+
+
