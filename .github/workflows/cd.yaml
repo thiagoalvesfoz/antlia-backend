@@ -12,6 +12,9 @@ jobs:
     runs-on: self-hosted
 
     steps:
+    - name: Login to Github Container Registry
+      run: echo ${{ secrets.GH_PACKAGES_TOKEN }} | docker login ghcr.io -u "${{ secrets.GH_PACKAGES_USER }}" --password-stdin
+
     - name: Pull Docker Image
       run: sudo docker pull ghcr.io/projeto-antlia/antlia-core-api:latest
 
