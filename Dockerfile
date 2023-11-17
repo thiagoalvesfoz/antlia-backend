@@ -1,14 +1,18 @@
 ARG NODE_VERSION=18.16.0
 
+# --------------------- Base -------------------------------- #
+
 FROM node:${NODE_VERSION}-slim as base
 
 RUN apt-get update -qq
 
-FROM base as build
+RUN npm i -g pnpm
+
+# --------------------- Builder ----------------------------- #
+
+FROM base as builder
 
 RUN apt-get install -y python-is-python3 pkg-config build-essential openssl
-
-RUN npm i -g pnpm
 
 WORKDIR /app 
 COPY package*.json . 
@@ -24,7 +28,9 @@ RUN pnpm prune --prod
 
 RUN ls
 
-FROM base AS deploy
+# --------------------- Release ----------------------------- #
+
+FROM base AS Release
 
 ENV NODE_ENV=production
 
@@ -32,9 +38,8 @@ RUN apt-get install -y libssl-dev dumb-init -y --no-install-recommends
 
 WORKDIR /app
 
-COPY --from=build /app/dist/ ./dist/
-COPY --from=build /app/node_modules/ ./node_modules
+COPY --from=builder /app .
 
 EXPOSE 3000
 
-CMD [ "dumb-init", "node", "dist/main.js" ]
+CMD [ "dumb-init", "pnpm", "start:migrate:prod" ]
