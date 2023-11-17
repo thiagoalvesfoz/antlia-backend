@@ -19,9 +19,11 @@ jobs:
           username: ${{ secrets.GH_PACKAGES_USER }}
           password: ${{ secrets.GH_PACKAGES_TOKEN }}
 
-      - run: |
+      - name: Build Dockerfile
+        run: |
           docker build -t ghcr.io/projeto-antlia/antlia-core-api:latest .
 
-      - run: |
+      - name: Push Image
+        run: |
           docker push ghcr.io/projeto-antlia/antlia-core-api:latest
 
