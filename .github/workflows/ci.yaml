@@ -20,8 +20,8 @@ jobs:
           password: ${{ secrets.GH_PACKAGES_TOKEN }}
 
       - run: |
-        docker build -t ghcr.io/projeto-antlia/antlia-core-api:latest .
+          docker build -t ghcr.io/projeto-antlia/antlia-core-api:latest .
 
       - run: |
-        docker push ghcr.io/projeto-antlia/antlia-core-api:latest
+          docker push ghcr.io/projeto-antlia/antlia-core-api:latest
 
