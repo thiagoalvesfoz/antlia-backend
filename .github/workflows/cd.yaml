@@ -15,11 +15,11 @@ jobs:
     - name: Login to Github Container Registry
       run: echo ${{ secrets.GH_PACKAGES_TOKEN }} | docker login ghcr.io -u "${{ secrets.GH_PACKAGES_USER }}" --password-stdin
 
-    - name: Pull Docker Image
-      run: docker pull ghcr.io/projeto-antlia/antlia-core-api:latest
+    - name: Delete Old Docker Container
+      run: docker-compose stop && docker-compose rm -f
 
-    - name: Delete Old docker container
-      run: docker rm -f antlia-core-api || true
+    - name: Pull Docker Image
+      run: docker-compose pull
 
     - name: Run Docker Container
-      run: docker run -d -p 8080:3000 --env-file "~/.env.prod" --name antlia-core-api ghcr.io/projeto-antlia/antlia-core-api:latest
+      run: docker-compose up -d
