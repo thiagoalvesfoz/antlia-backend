@@ -16,10 +16,10 @@ jobs:
       run: echo ${{ secrets.GH_PACKAGES_TOKEN }} | docker login ghcr.io -u "${{ secrets.GH_PACKAGES_USER }}" --password-stdin
 
     - name: Pull Docker Image
-      run: sudo docker pull ghcr.io/projeto-antlia/antlia-core-api:latest
+      run: docker pull ghcr.io/projeto-antlia/antlia-core-api:latest
 
     - name: Delete Old docker container
-      run: sudo docker rm -f antlia-core-api || true
+      run: docker rm -f antlia-core-api || true
 
     - name: Run Docker Container
-      run: sudo docker run -d -p 8080:3000 --env-file "~/.env.prod" --name antlia-core-api ghcr.io/projeto-antlia/antlia-core-api:latest
+      run: docker run -d -p 8080:3000 --env-file "~/.env.prod" --name antlia-core-api ghcr.io/projeto-antlia/antlia-core-api:latest
