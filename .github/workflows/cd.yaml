@@ -1,0 +1,22 @@
+name: CD Pipeline
+
+on:
+  workflow_run:
+    workflows: ["CI Pipeline"]
+    types:
+      - completed
+
+jobs:
+
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+    - name: Pull Docker Image
+      run: docker pull ghcr.io/projeto-antlia/antlia-core-api:latest
+
+    - name: Delete Old docker container
+      run: sudo docker rm -f antlia-core-api || true
+
+    - name: Run Docker Container
+      run: sudo docker run -d -p 8080:3000 --env-file ~/.env.prod --name antlia-core-api ghcr.io/projeto-antlia/antlia-core-api:latest
