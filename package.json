@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "prisma": {
-    "seed": "ts-node src/prisma/seeds.ts"
+    "seed": "ts-node src/common/prisma/seeds.ts"
   },
   "scripts": {
     "build": "nest build",
@@ -25,7 +25,8 @@
     "db:studio": "npx prisma studio",
     "db:generate": "npx prisma generate",
     "db:migrate": "npx prisma migrate dev",
-    "db:refresh": "yarn db:generate && yarn db:migrate"
+    "db:refresh": "pnpm db:generate && pnpm db:migrate",
+    "db:seed": "npx prisma db seed"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.9.1",

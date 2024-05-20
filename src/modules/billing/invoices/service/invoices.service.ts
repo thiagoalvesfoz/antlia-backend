@@ -16,7 +16,6 @@ type GetInvoiceDto = {
 
 @Injectable()
 export class InvoicesService {
-
   constructor(
     @Inject(INVOICE_NAME_PROVIDER)
     private readonly invoiceRepository: InvoiceRepository,
@@ -56,7 +55,10 @@ export class InvoicesService {
 
     const invoiceUpdated = await this.invoiceRepository.update(invoice);
 
-    return this.#mapInvoiceDto({ invoice: invoiceUpdated, withTransactions: false })
+    return this.#mapInvoiceDto({
+      invoice: invoiceUpdated,
+      withTransactions: false,
+    });
   }
 
   async closeInvoice(invoice: Invoice): Promise<Invoice> {
@@ -90,7 +92,6 @@ export class InvoicesService {
 
     return this.#mapInvoiceDto({ invoice });
   }
-
 
   #mapInvoiceDto({ invoice, withTransactions = true }: GetInvoiceDto) {
     return InvoiceDto.build({
