@@ -23,5 +23,5 @@ export {
   CustomerRepository,
   CustomerRepositoryProvider,
   INVOICE_NAME_PROVIDER,
-  CUSTOMER_NAME_PROVIDER
+  CUSTOMER_NAME_PROVIDER,
 };

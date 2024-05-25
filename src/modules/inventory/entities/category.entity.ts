@@ -1,4 +1,4 @@
-import { InvalidAttributeException } from "src/common/exceptions/invalid-attribute-exception";
+import { InvalidAttributeException } from 'src/common/exceptions/invalid-attribute-exception';
 
 export type CategoryProps = {
   id?: string;

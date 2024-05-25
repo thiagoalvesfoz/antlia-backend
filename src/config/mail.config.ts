@@ -1,10 +1,11 @@
-import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
-import { join } from "path";
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { join } from 'path';
 
 const helpers = {
   price: (total: number) => `R$ ${total.toFixed(2)}`,
-  code: (uuid: string) => `#${uuid.split("-")[0]}`,
-  firstName: (fullname: string) => fullname.includes(" ") ? `${fullname.split(" ")[0]}` : fullname,
+  code: (uuid: string) => `#${uuid.split('-')[0]}`,
+  firstName: (fullname: string) =>
+    fullname.includes(' ') ? `${fullname.split(' ')[0]}` : fullname,
 };
 
 export const MailConfig = {
@@ -28,4 +29,4 @@ export const MailConfig = {
       strict: true,
     },
   },
-}
+};

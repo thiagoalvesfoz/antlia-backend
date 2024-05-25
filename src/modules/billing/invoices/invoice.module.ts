@@ -18,10 +18,10 @@ import {
     CustomerRepositoryProvider,
   ],
   exports: [
-    InvoicesService, 
-    CustomerService, 
-    InvoiceRepositoryProvider, 
-    CustomerRepositoryProvider
+    InvoicesService,
+    CustomerService,
+    InvoiceRepositoryProvider,
+    CustomerRepositoryProvider,
   ],
 })
 export class InvoiceModule {}

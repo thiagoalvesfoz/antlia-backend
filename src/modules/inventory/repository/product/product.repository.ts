@@ -1,4 +1,4 @@
-import { Image, Product } from "../../entities";
+import { Image, Product } from '../../entities';
 
 export const PRODUCT_NAME_PROVIDER = 'ProductRepository';
 

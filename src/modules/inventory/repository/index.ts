@@ -29,5 +29,5 @@ export {
   CategoryRepositoryProvider,
   ProductRepositoryProvider,
   PRODUCT_NAME_PROVIDER,
-  CATEGORY_NAME_PROVIDER
+  CATEGORY_NAME_PROVIDER,
 };

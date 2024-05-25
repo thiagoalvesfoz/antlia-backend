@@ -6,18 +6,18 @@ interface MailSender {
   subject: string;
   template: string;
   context: object;
-};
+}
 
 @Injectable()
 export class MailService {
-    constructor(private mailerService: MailerService) {}
+  constructor(private mailerService: MailerService) {}
 
-    async sendEmail(config: MailSender) {    
-        await this.mailerService.sendMail({
-          to: config.to,
-          subject: config.subject,
-          template: config.template,
-          context: config.context,
-        });
-      }
+  async sendEmail(config: MailSender) {
+    await this.mailerService.sendMail({
+      to: config.to,
+      subject: config.subject,
+      template: config.template,
+      context: config.context,
+    });
+  }
 }

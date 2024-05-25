@@ -102,7 +102,7 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
 
     return this.#map(invoiceModel);
   }
-  
+
   async findOpenInvoiceByCustomerId(customer_id: string): Promise<Invoice> {
     if (!customer_id) return;
 
@@ -122,9 +122,9 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
     const count = await this.prismaService.invoice.count({
       where: {
         bill_status: BillStatus.OPENDED,
-        end_at: date
-      }
-    })
+        end_at: date,
+      },
+    });
 
     return count;
   }
@@ -133,9 +133,9 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
     const invoiceModel = await this.prismaService.invoice.findMany({
       where: {
         end_at: date,
-        bill_status: BillStatus.OPENDED
-      }
-    })
+        bill_status: BillStatus.OPENDED,
+      },
+    });
 
     return invoiceModel.map(this.#map);
   }
@@ -143,13 +143,13 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
   async closeInvoice(invoices: Invoice) {
     await this.prismaService.invoice.update({
       where: {
-        id: invoices.id
+        id: invoices.id,
       },
       data: {
         bill_status: invoices.bill_status,
         end_at: invoices.end_at,
       },
-    })
+    });
   }
 
   #map(invoiceModel: InvoiceModelProps) {
@@ -162,15 +162,16 @@ export class InvoiceMysqlRepository implements InvoiceRepository {
           bill_status: BillStatus[invoiceModel.bill_status],
           pay_status: PayStatus[invoiceModel.pay_status],
           total_paid: +invoiceModel.total_paid,
-          transactions: invoiceModel.transactions?.map(
-            (transaction) =>
-              new Transaction({
-                id: transaction.id,
-                order_id: transaction.order_id,
-                price: +transaction.price,
-                created_at: transaction.created_at,
-              }),
-          ) || [],
+          transactions:
+            invoiceModel.transactions?.map(
+              (transaction) =>
+                new Transaction({
+                  id: transaction.id,
+                  order_id: transaction.order_id,
+                  price: +transaction.price,
+                  created_at: transaction.created_at,
+                }),
+            ) || [],
         })
       : undefined;
   }

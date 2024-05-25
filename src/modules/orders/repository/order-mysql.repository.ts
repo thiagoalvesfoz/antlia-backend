@@ -46,7 +46,7 @@ const include = {
       quantity: true,
       subtotal: true,
       created_at: true,
-      updated_at: true
+      updated_at: true,
     },
   },
   customer: {
@@ -55,7 +55,7 @@ const include = {
       name: true,
     },
   },
-}
+};
 
 @Injectable()
 export class OrderMysqlRepository implements OrderRepository {
@@ -78,14 +78,14 @@ export class OrderMysqlRepository implements OrderRepository {
           },
         },
       },
-      include
+      include,
     });
 
     return this.#map(orderModel);
   }
   async findAll(): Promise<Order[]> {
     const orders = await this.prismaService.order.findMany({
-      include
+      include,
     });
 
     return orders.map(this.#map);
@@ -98,7 +98,7 @@ export class OrderMysqlRepository implements OrderRepository {
       where: {
         id: order_id,
       },
-      include
+      include,
     });
 
     return this.#map(order);
@@ -119,7 +119,7 @@ export class OrderMysqlRepository implements OrderRepository {
                 product_id: orderItems.product_id,
                 product_name: orderItems.product.name,
                 quantity: orderItems.quantity,
-                subtotal: +orderItems.subtotal
+                subtotal: +orderItems.subtotal,
               }),
           ),
         })

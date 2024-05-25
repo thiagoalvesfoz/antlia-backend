@@ -1,4 +1,4 @@
-import { BadRequestException, UnprocessableEntityException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
 
 export class InvalidAttributeException extends BadRequestException {
   constructor(msg: string) {

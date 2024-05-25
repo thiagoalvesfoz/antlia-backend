@@ -1,7 +1,7 @@
-import { BillStatus, PayStatus } from "../entities/invoice.entity";
+import { BillStatus, PayStatus } from '../entities/invoice.entity';
 
 export class UpdateInvoiceDto {
-    bill_status: BillStatus;
-    pay_status: PayStatus;
-    total_paid: number;
+  bill_status: BillStatus;
+  pay_status: PayStatus;
+  total_paid: number;
 }

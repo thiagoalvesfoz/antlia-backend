@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { UserRepository, USER_NAME_PROVIDER } from './repository/users.repository'
+import {
+  UserRepository,
+  USER_NAME_PROVIDER,
+} from './repository/users.repository';
 import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import { BusinessRuleException } from 'src/common/exceptions/business-rule.exception';
 import { CreateUserDto } from './dto/create-user.dto';

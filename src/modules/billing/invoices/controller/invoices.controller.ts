@@ -37,7 +37,10 @@ export class InvoicesController {
   }
 
   @Get(':invoice_id')
-  async updateInvoice(@Param('invoice_id') invoice_id: string, @Body() invoiceDto: UpdateInvoiceDto) {
+  async updateInvoice(
+    @Param('invoice_id') invoice_id: string,
+    @Body() invoiceDto: UpdateInvoiceDto,
+  ) {
     return this.invoicesService.updateInvoice(invoice_id, invoiceDto);
   }
 }

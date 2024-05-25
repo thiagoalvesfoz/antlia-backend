@@ -8,7 +8,6 @@ import { Product } from '../entities';
 import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import { UpdateProductDto } from '../dto/update-product.dto';
 
-
 @Injectable()
 export class ProductsService {
   constructor(
@@ -90,7 +89,7 @@ export class ProductsService {
   async getImage(product_id: string) {
     const product = await this.findOne(product_id);
     const image = await this.productRepository.getImage(product.id);
-    if (!image) throw new ResourceNotFoundException('image not found');;
+    if (!image) throw new ResourceNotFoundException('image not found');
     return image;
   }
 }

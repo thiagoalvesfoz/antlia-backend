@@ -25,7 +25,7 @@ import { OrdersModule } from './orders/orders.module';
     TasksModule,
     EventEmitterModule.forRoot(),
     ScheduleModule.forRoot(),
-    MailerModule.forRoot(MailConfig)
+    MailerModule.forRoot(MailConfig),
   ],
   controllers: [],
   providers: [],

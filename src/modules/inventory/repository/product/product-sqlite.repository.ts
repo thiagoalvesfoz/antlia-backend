@@ -4,7 +4,6 @@ import { ProductRepository } from './product.repository';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Image, Product } from '../../entities';
 
-
 type ProductModelMapper = ProducModel & {
   category: {
     name: string;

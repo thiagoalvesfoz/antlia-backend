@@ -6,6 +6,6 @@ import { BillingModule } from '../billing/billing.module';
 @Module({
   imports: [BillingModule],
   providers: [MailService, SendEmailListener],
-  exports: [MailService]
+  exports: [MailService],
 })
 export class MailModule {}

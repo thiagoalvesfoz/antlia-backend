@@ -3,7 +3,7 @@ import { InvoiceModule } from './invoices/invoice.module';
 import { RouterModule } from '@nestjs/core';
 import { OrderCreatedListener } from './listeners/order-created.listener';
 
-const PATH_API = 'billing'
+const PATH_API = 'billing';
 
 @Module({
   imports: [

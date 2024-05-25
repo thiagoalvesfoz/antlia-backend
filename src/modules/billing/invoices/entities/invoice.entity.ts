@@ -1,4 +1,3 @@
-
 import { Transaction } from './transaction.entity';
 import { Customer } from './customer.entity';
 import { BusinessRuleException } from 'src/common/exceptions/business-rule.exception';
@@ -61,16 +60,22 @@ export class Invoice {
     this.end_at = new Date();
   }
 
-  pay(total_paid: number) {    
+  pay(total_paid: number) {
     const pending_amount = this.getTotal();
-    const minimum_payment = this.getMinimumPayment()
+    const minimum_payment = this.getMinimumPayment();
 
     if (total_paid < minimum_payment) {
-     throw new BusinessRuleException(`invalid payment, the minimum amount accepted is ${minimum_payment.toFixed(2)}`);
+      throw new BusinessRuleException(
+        `invalid payment, the minimum amount accepted is ${minimum_payment.toFixed(
+          2,
+        )}`,
+      );
     }
 
     if (total_paid > pending_amount) {
-      throw new BusinessRuleException('payments above the total invoice amount are not accepted')
+      throw new BusinessRuleException(
+        'payments above the total invoice amount are not accepted',
+      );
     }
 
     if (total_paid < pending_amount) {
@@ -81,7 +86,7 @@ export class Invoice {
       const isClosed = this.bill_status === BillStatus.CLOSED;
       this.pay_status = isClosed ? PayStatus.PAID : PayStatus.PARTLY_PAID;
     }
-    
+
     this.total_paid = total_paid;
   }
 
@@ -113,6 +118,6 @@ export class Invoice {
 
   getMinimumPayment() {
     const PERCENTAGE_VALUE_DEFAULT = 15;
-    return this.getTotal() / 100 * PERCENTAGE_VALUE_DEFAULT;
+    return (this.getTotal() / 100) * PERCENTAGE_VALUE_DEFAULT;
   }
 }

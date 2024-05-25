@@ -1,4 +1,3 @@
-import { NestFactory } from '@nestjs/core';
 import { INestApplication } from '@nestjs/common';
 import {
   DocumentBuilder,
@@ -7,7 +6,6 @@ import {
 } from '@nestjs/swagger';
 
 export function configureSwagger(app: INestApplication<any>) {
-
   const config = new DocumentBuilder()
     .setTitle('Projeto Antlia')
     .setDescription('Antlia API')
@@ -21,4 +19,3 @@ export function configureSwagger(app: INestApplication<any>) {
   const document = SwaggerModule.createDocument(app, config, options);
   SwaggerModule.setup('api-docs', app, document);
 }
-

@@ -26,7 +26,6 @@ import { ApiTags } from '@nestjs/swagger';
 import { Role, Roles } from 'src/common/decorators/role.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 
-
 @ApiTags('Products')
 @Controller('products')
 export class ProductsController {

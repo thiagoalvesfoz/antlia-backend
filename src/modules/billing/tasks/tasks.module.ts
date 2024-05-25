@@ -3,7 +3,7 @@ import { InvoiceClosingTaskService } from './billing/invoice-closing.task';
 import { InvoiceRepositoryProvider } from '../invoices/repository';
 
 @Module({
-  imports: [],    
+  imports: [],
   controllers: [],
   providers: [InvoiceClosingTaskService, InvoiceRepositoryProvider],
   exports: [],

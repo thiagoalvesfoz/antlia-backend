@@ -5,7 +5,7 @@ import { InventoryModule } from '../inventory/inventory.module';
 import { OrdersService } from './service/orders.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
-const EventProvider = { provide: 'EventEmitter', useExisting: EventEmitter2 }
+const EventProvider = { provide: 'EventEmitter', useExisting: EventEmitter2 };
 
 @Module({
   imports: [InventoryModule],

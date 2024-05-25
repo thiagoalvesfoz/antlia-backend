@@ -1,4 +1,4 @@
-import { BusinessRuleException } from "src/common/exceptions/business-rule.exception";
+import { BusinessRuleException } from 'src/common/exceptions/business-rule.exception';
 
 type ImageProps = {
   id?: string;

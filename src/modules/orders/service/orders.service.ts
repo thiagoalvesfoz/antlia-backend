@@ -1,5 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { OrderRepository, ORDER_NAME_PROVIDER } from '../repository/order.repository';
+import {
+  OrderRepository,
+  ORDER_NAME_PROVIDER,
+} from '../repository/order.repository';
 import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import { BusinessRuleException } from 'src/common/exceptions/business-rule.exception';
 import { OrderCreatedEvent } from 'src/common/events/order-created.event';
@@ -10,7 +13,7 @@ import { UserDto } from 'src/modules/account/domain/dto/user-response.dto';
 import { Order } from '../entities/order.entity';
 import EventEmitter from 'events';
 
-const EVENT_NAME_PROVIDER = 'EventEmitter'
+const EVENT_NAME_PROVIDER = 'EventEmitter';
 
 @Injectable()
 export class OrdersService {
@@ -20,7 +23,7 @@ export class OrdersService {
     @Inject(EVENT_NAME_PROVIDER)
     private readonly eventEmitter: EventEmitter,
     private readonly productService: ProductsService,
-    ) {}
+  ) {}
 
   async create(createOrderDto: CreateOrderDto, user: UserDto) {
     const { order_items } = createOrderDto;
@@ -55,7 +58,10 @@ export class OrdersService {
 
     const orderCreated = await this.orderRepository.create(order);
 
-    this.eventEmitter.emit('order.created', new OrderCreatedEvent(orderCreated));
+    this.eventEmitter.emit(
+      'order.created',
+      new OrderCreatedEvent(orderCreated),
+    );
 
     return orderCreated;
   }

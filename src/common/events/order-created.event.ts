@@ -1,9 +1,7 @@
-import { Order } from "src/modules/orders/entities/order.entity";
+import { Order } from 'src/modules/orders/entities/order.entity';
 
 class OrderCreatedEvent {
-  constructor(readonly order: Order){}
+  constructor(readonly order: Order) {}
 }
 
-export {
-  OrderCreatedEvent, Order
-}
+export { OrderCreatedEvent, Order };
