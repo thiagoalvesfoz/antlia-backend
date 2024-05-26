@@ -71,6 +71,55 @@ export class UserMysqlRepository implements UserRepository {
     return this.#map(userModel);
   }
 
+  async update(user: User): Promise<User> {
+    if (!user.id) return;
+    const { id, username, password } = user;
+
+    const userModel = await this.prismaService.$transaction(async (tx) => {
+      // Primeiro, removemos todas as roles antigas do usuário
+      await tx.rolesOnUsers.deleteMany({
+        where: { user_id: id },
+      });
+
+      const userModel = await tx.user.update({
+        where: { id },
+        data: {
+          username,
+          password,
+          profile: {
+            upsert: {
+              create: {
+                name: user.profile.name,
+                email: user.profile.email,
+                cell_phone: user.profile.cell_phone,
+              },
+              update: {
+                name: user.profile.name,
+                email: user.profile.email,
+                cell_phone: user.profile.cell_phone,
+              },
+            },
+          },
+          roles: {
+            create: user.roles.map((role) => ({
+              assigned_by: 'admin',
+              role: {
+                connect: {
+                  name: role,
+                },
+              },
+            })),
+          },
+        },
+        include: include_roles_and_profile,
+      });
+
+      return userModel;
+    });
+
+    return this.#map(userModel);
+  }
+
   async findAll(): Promise<User[]> {
     const users: UserModel[] = await this.prismaService.user.findMany({
       include: include_roles_and_profile,
@@ -109,6 +158,27 @@ export class UserMysqlRepository implements UserRepository {
     });
 
     return this.#map(userModel);
+  }
+
+  async isEmailExists(email: string): Promise<boolean> {
+    if (!email) return;
+
+    const emailFound = await this.prismaService.profile.count({
+      where: { email },
+    });
+
+    return emailFound > 0;
+  }
+
+  async updatePassword(user: User): Promise<void> {
+    if (!user.id) return;
+
+    await this.prismaService.user.update({
+      where: { id: user.id },
+      data: {
+        password: user.password,
+      },
+    });
   }
 
   #map(userModel: UserModelMapper): User {

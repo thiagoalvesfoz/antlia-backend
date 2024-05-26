@@ -38,4 +38,8 @@ export class User {
   is_match_password(password: string) {
     return bcrypt.compareSync(password, this.password);
   }
+
+  updatePassword(password: string) {
+    this.password = bcrypt.hashSync(password, 10);
+  }
 }

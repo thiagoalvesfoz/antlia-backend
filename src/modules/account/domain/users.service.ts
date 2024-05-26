@@ -10,6 +10,8 @@ import { Profile } from './entity/profile.entity';
 import { UserDto } from './dto/user-response.dto';
 import { User } from './entity/user.entity';
 import { Role } from './entity/role.entity';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -43,6 +45,13 @@ export class UsersService {
       throw new BusinessRuleException('username already exists');
     }
 
+    const isEmailExists: boolean = await this.userRepository.isEmailExists(
+      email,
+    );
+    if (!!isEmailExists) {
+      throw new BusinessRuleException('email already exists');
+    }
+
     const assigned_roles = await this.asignRoles(roles);
 
     const register = new User({
@@ -56,6 +65,48 @@ export class UsersService {
 
     const user = await this.userRepository.create(register);
 
+    return UserDto.build(user);
+  }
+
+  async update(user_id: string, updateUserDto: UpdateUserDto) {
+    let user = await this.userRepository.findById(user_id);
+
+    if (!user) {
+      throw new ResourceNotFoundException('user not found');
+    }
+
+    const { username, roles, name, email, cell_phone } = updateUserDto;
+
+    if (user.username !== username) {
+      const userAlreadyExists = await this.userRepository.findByUsername(
+        username,
+      );
+
+      if (!!userAlreadyExists) {
+        throw new BusinessRuleException('username already exists');
+      }
+    }
+
+    if (user.profile.email !== email) {
+      const isEmailExists: boolean = await this.userRepository.isEmailExists(
+        email,
+      );
+      if (!!isEmailExists) {
+        throw new BusinessRuleException('email already exists');
+      }
+    }
+
+    const assigned_roles = await this.asignRoles(roles);
+
+    const userToUpdate = new User({
+      id: user.id,
+      username,
+      password: user.password,
+      roles: assigned_roles,
+      profile: new Profile({ name, email, cell_phone }),
+    });
+
+    user = await this.userRepository.update(userToUpdate);
     return UserDto.build(user);
   }
 
@@ -98,5 +149,25 @@ export class UsersService {
 
   async findByUsername(username: string): Promise<User> {
     return await this.userRepository.findByUsername(username);
+  }
+
+  async updatePassword(user_id: string, updatePasswordDto: UpdatePasswordDto) {
+    const user = await this.userRepository.findById(user_id);
+
+    if (!user) {
+      throw new ResourceNotFoundException('user not found');
+    }
+
+    const { password, password_confirmation } = updatePasswordDto;
+
+    if (password !== password_confirmation) {
+      throw new BusinessRuleException(
+        'password and password_confirmation does not match',
+      );
+    }
+
+    user.updatePassword(password);
+
+    await this.userRepository.updatePassword(user);
   }
 }

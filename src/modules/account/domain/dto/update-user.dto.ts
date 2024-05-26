@@ -8,7 +8,7 @@ import {
 import { Role } from '../entity/role.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateUserDto {
+export class UpdateUserDto {
   @IsNotEmpty()
   @IsString()
   @Length(3, 100)
@@ -30,18 +30,6 @@ export class CreateUserDto {
   @Length(3, 20)
   @ApiProperty({ description: 'ID de login único' })
   username: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @Length(3, 20)
-  @ApiProperty({ description: 'Senha para login' })
-  password: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @Length(3, 20)
-  @ApiProperty({ description: 'confirmação de senha' })
-  password_confirmation: string;
 
   @IsNotEmpty()
   @ApiProperty({ description: 'Funções do usuário na aplicação', enum: Role })
