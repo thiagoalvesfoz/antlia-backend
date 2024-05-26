@@ -4,6 +4,5 @@ export class UpdateCategoryDto {
   @IsNotEmpty()
   @Length(3, 20)
   name: string;
-  enable: boolean;
-  show_menu: boolean;
+  image?: Express.Multer.File;
 }

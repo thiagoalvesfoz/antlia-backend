@@ -76,6 +76,6 @@ export class Product {
   }
 
   addImage(bytes: Buffer, mimetype: string) {
-    this.image = new Image({ bytes, mimetype, product_id: this.id });
+    this.image = new Image({ bytes, mimetype });
   }
 }

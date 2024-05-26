@@ -63,28 +63,35 @@ model Profile {
 }
 
 model Category {
-  id         String    @id @default(uuid())
-  name       String    @unique
-  enable     Boolean   @default(true)
-  show_menu  Boolean   @default(false)
+  id         String         @id @default(uuid())
+  name       String         @unique
+  enable     Boolean        @default(true)
   Product    Product[]
-  created_at DateTime  @default(now())
-  updated_at DateTime  @default(now()) @updatedAt
+  
+  Image      Image?          @relation(fields: [image_id], references: [id])
+  image_id   String?        @unique
+  
+  created_at DateTime       @default(now())
+  updated_at DateTime       @default(now()) @updatedAt
 
   @@index([name, id])
   @@map(name: "categories")
 }
 
 model Product {
-  id           String      @id @default(uuid())
-  name         String      @unique
-  price        Decimal     @db.Decimal(9, 2)
-  availability Boolean     @default(true)
-  category     Category    @relation(fields: [category_id], references: [id])
+  id           String         @id @default(uuid())
+  name         String         @unique
+  price        Decimal        @db.Decimal(9, 2)
+  availability Boolean        @default(true)
+  
+  category     Category       @relation(fields: [category_id], references: [id])
   category_id  String
-  image        Image?
-  created_at   DateTime    @default(now())
-  updated_at   DateTime    @default(now()) @updatedAt
+  
+  Image        Image?          @relation(fields: [image_id], references: [id])
+  image_id     String?        @unique
+  
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @default(now()) @updatedAt
   OrderItem    OrderItem[]
 
   @@index([name, id])
@@ -95,12 +102,13 @@ model Image {
   id         String   @id @default(uuid())
   bytes      Bytes?   @db.Blob
   mimetype   String   @db.VarChar(15)
-  product    Product  @relation(fields: [product_id], references: [id])
-  product_id String   @unique
+  Product    Product?
+  Category   Category?
   created_at DateTime @default(now())
   updated_at DateTime @default(now()) @updatedAt
 
-  @@map(name: "categories_images")
+  @@index([id])
+  @@map(name: "images")
 }
 
 model Order {

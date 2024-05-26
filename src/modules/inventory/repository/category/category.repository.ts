@@ -1,4 +1,4 @@
-import { Category } from '../../entities';
+import { Category, Image } from '../../entities';
 
 export const CATEGORY_NAME_PROVIDER = 'CategoryRepository';
 
@@ -9,4 +9,6 @@ export interface CategoryRepository {
   update(category: Category): Promise<Category>;
   remove(category_id: string): Promise<void>;
   findByName(name: string): Promise<Category>;
+  getImage(image_id: string): Promise<Image>;
+  enable(category_id: string, enable: boolean): Promise<void>;
 }

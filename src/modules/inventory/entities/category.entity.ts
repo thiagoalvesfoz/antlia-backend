@@ -1,10 +1,11 @@
 import { InvalidAttributeException } from 'src/common/exceptions/invalid-attribute-exception';
+import { Image } from './image.entity';
 
 export type CategoryProps = {
   id?: string;
   name: string;
   enable: boolean;
-  show_menu: boolean;
+  image?: Image;
   created_at?: Date;
   updated_at?: Date;
 };
@@ -13,7 +14,7 @@ export class Category {
   id?: string;
   name: string;
   enable: boolean;
-  show_menu: boolean;
+  image?: Image;
   created_at?: Date;
   updated_at?: Date;
 
@@ -21,7 +22,7 @@ export class Category {
     this.id = props.id;
     this.updateName(props.name);
     this.updateEnable(props.enable);
-    this.updateShowMenu(props.show_menu);
+    this.image = props.image;
     this.created_at = props.created_at;
     this.updated_at = props.updated_at;
   }
@@ -38,7 +39,11 @@ export class Category {
     this.enable = enable;
   }
 
-  updateShowMenu(showMenu = false) {
-    this.show_menu = showMenu;
+  addImage(bytes: Buffer, mimetype: string) {
+    if (this.image?.id) {
+      this.image.update({ bytes, mimetype });
+    } else {
+      this.image = new Image({ bytes, mimetype });
+    }
   }
 }

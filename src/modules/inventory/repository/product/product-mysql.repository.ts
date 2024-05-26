@@ -134,35 +134,11 @@ export class ProductMysqlRepository implements ProductRepository {
   }
 
   async saveImage(product: Product): Promise<void> {
-    if (!product || !product.image || !product.image.product_id) return;
-
-    const { bytes, mimetype, product_id } = product.image;
-
-    const imageIsPresent = await this.getImage(product_id);
-
-    if (imageIsPresent) {
-      await this.prismaService.image.delete({
-        where: { id: imageIsPresent.id },
-      });
-    }
-
-    await this.prismaService.image.create({
-      data: {
-        bytes,
-        mimetype,
-        product_id,
-      },
-    });
+    throw new Error('implementar');
   }
 
   async getImage(product_id: string): Promise<Image> {
-    if (!product_id) return;
-
-    const imageModel = await this.prismaService.image.findFirst({
-      where: { product_id },
-    });
-
-    return this.#mapImage(imageModel);
+    throw new Error('implementar');
   }
 
   #map(producModel: ProductModelMapper): Product {
@@ -186,7 +162,6 @@ export class ProductMysqlRepository implements ProductRepository {
           id: imageModel.id,
           bytes: imageModel.bytes,
           mimetype: imageModel.mimetype,
-          product_id: imageModel.product_id,
           created_at: imageModel.created_at,
           updated_at: imageModel.updated_at,
         })

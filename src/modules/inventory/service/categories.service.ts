@@ -5,6 +5,7 @@ import { CategoryRepository, CATEGORY_NAME_PROVIDER } from '../repository';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { Category } from '../entities';
+import { ViewCategoryDto } from '../dto/view-category.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -13,34 +14,31 @@ export class CategoriesService {
     private readonly categoryRepository: CategoryRepository,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+  async create(createCategoryDto: CreateCategoryDto): Promise<ViewCategoryDto> {
     // não cadastrar categoria com o mesmo nome
     await this.#requiredUniqueCategoryName(createCategoryDto.name);
 
     const category = new Category({
       name: createCategoryDto.name,
       enable: createCategoryDto.enable,
-      show_menu: createCategoryDto.show_menu,
     });
 
-    return await this.categoryRepository.create(category);
-  }
+    if (createCategoryDto.image) {
+      const { image } = createCategoryDto;
+      category.addImage(image.buffer, image.mimetype);
+    }
 
-  async findAll(): Promise<Category[]> {
-    return await this.categoryRepository.findAll();
-  }
+    const categoryCreated = await this.categoryRepository.create(category);
 
-  async findOne(category_id: string): Promise<Category> {
-    const category = await this.categoryRepository.findById(category_id);
-    if (!category) throw new ResourceNotFoundException('category not found');
-    return category;
+    return ViewCategoryDto.map(categoryCreated);
   }
 
   async update(
     category_id: string,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<Category> {
-    const category = await this.findOne(category_id);
+    const category = await this.categoryRepository.findById(category_id);
+    if (!category) throw new ResourceNotFoundException('category not found');
 
     // não utilizar o mesmo nome de outra categoria
     if (category.name !== updateCategoryDto.name) {
@@ -48,15 +46,41 @@ export class CategoriesService {
       category.updateName(updateCategoryDto.name);
     }
 
-    category.updateEnable(updateCategoryDto.enable);
-    category.updateShowMenu(updateCategoryDto.show_menu);
+    if (updateCategoryDto.image) {
+      const { image } = updateCategoryDto;
+      category.addImage(image.buffer, image.mimetype);
+    }
 
     return await this.categoryRepository.update(category);
+  }
+
+  async toggleEnable(category_id: string, enable: boolean): Promise<void> {
+    const category = await this.categoryRepository.findById(category_id);
+    if (!category) throw new ResourceNotFoundException('category not found');
+    await this.categoryRepository.enable(category.id, enable);
+  }
+
+  async findAll(): Promise<ViewCategoryDto[]> {
+    const categories = await this.categoryRepository.findAll();
+    return categories.map(ViewCategoryDto.map);
+  }
+
+  async findOne(category_id: string): Promise<ViewCategoryDto> {
+    const category = await this.categoryRepository.findById(category_id);
+    if (!category) throw new ResourceNotFoundException('category not found');
+    return ViewCategoryDto.map(category);
   }
 
   async remove(category_id: string): Promise<void> {
     await this.findOne(category_id);
     await this.categoryRepository.remove(category_id);
+  }
+
+  async getImage(category_id: string) {
+    const category = await this.findOne(category_id);
+    const image = await this.categoryRepository.getImage(category.image_id);
+    if (!image) throw new ResourceNotFoundException('image not found');
+    return image;
   }
 
   // FIX: Prisma Client does not offer support for case-insensitive filtering with SQLite
