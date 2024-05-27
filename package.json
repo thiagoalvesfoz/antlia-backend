@@ -102,7 +102,12 @@
     "moduleNameMapper": {
       "^src/(.*)$": "<rootDir>/$1",
       "^@common/(.*)$": "<rootDir>/common/$1",
-      "^@inventory/(.*)$": "<rootDir>/modules/inventory/$1"
+      "^@account/(.*)$": "<rootDir>/modules/account/$1",
+      "^@auth/(.*)$": "<rootDir>/modules/auth/$1",
+      "^@billing/(.*)$": "<rootDir>/modules/billing/$1",
+      "^@inventory/(.*)$": "<rootDir>/modules/inventory/$1",
+      "^@mail/(.*)$": "<rootDir>/modules/mail/$1",
+      "^@orders/(.*)$": "<rootDir>/modules/orders/$1"
     }
   }
 }

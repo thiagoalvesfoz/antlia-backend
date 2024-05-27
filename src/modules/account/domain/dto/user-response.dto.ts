@@ -27,7 +27,7 @@ export class UserDto {
   @ApiProperty()
   updated_at?: Date;
 
-  @ApiProperty()
+  @ApiProperty({ enum: Role })
   roles: Role[];
 
   constructor(user: User) {

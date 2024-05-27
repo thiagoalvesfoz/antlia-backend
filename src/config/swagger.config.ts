@@ -10,6 +10,7 @@ export function configureSwagger(app: INestApplication<any>) {
     .setTitle('Projeto Antlia')
     .setDescription('Antlia API')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const options: SwaggerDocumentOptions = {

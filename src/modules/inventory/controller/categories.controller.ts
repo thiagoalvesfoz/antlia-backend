@@ -15,10 +15,11 @@ import {
   Patch,
   StreamableFile,
   Res,
+  HttpStatus,
 } from '@nestjs/common';
 import { CategoriesService } from '../service/categories.service';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { Role, Roles } from 'src/common/decorators/role.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CreateCategoryDto } from '../dto/create-category.dto';
@@ -32,9 +33,10 @@ const MAX_FILE_SIZE = 1000000; //1MB
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
+  @ApiConsumes('multipart/form-data')
   @Roles(Role.ADMIN)
   @Post()
-  @HttpCode(201)
+  @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(FileInterceptor('image'))
   async createCategory(
     @UploadedFile(
@@ -56,18 +58,21 @@ export class CategoriesController {
   }
 
   @Get()
+  @HttpCode(HttpStatus.OK)
   findAll() {
     return this.categoriesService.findAll();
   }
 
   @Get(':category_id')
+  @HttpCode(HttpStatus.OK)
   findOne(@Param('category_id') category_id: string) {
     return this.categoriesService.findOne(category_id);
   }
 
+  @ApiConsumes('multipart/form-data')
   @Roles(Role.ADMIN)
   @Put(':category_id')
-  @HttpCode(201)
+  @HttpCode(HttpStatus.OK)
   @UseInterceptors(FileInterceptor('image'))
   async updateCategory(
     @Param('category_id') category_id: string,
@@ -90,7 +95,7 @@ export class CategoriesController {
   }
 
   @Roles(Role.ADMIN)
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Patch(':category_id/enable')
   async toggleRemove(
     @Param('category_id') category_id: string,
@@ -100,7 +105,7 @@ export class CategoriesController {
   }
 
   @Roles(Role.ADMIN)
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':category_id')
   remove(@Param('category_id') category_id: string) {
     return this.categoriesService.remove(category_id);
@@ -108,6 +113,7 @@ export class CategoriesController {
 
   @Public()
   @Get(':category_id/image')
+  @HttpCode(HttpStatus.OK)
   async getFile(
     @Param('category_id') category_id: string,
     @Res({ passthrough: true }) res: Response,

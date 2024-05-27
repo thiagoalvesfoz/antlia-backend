@@ -21,8 +21,23 @@
       "@common/*": [
         "src/common/*"
       ],
+      "@account/*": [
+        "src/modules/account/*"
+      ],
+      "@auth/*": [
+        "src/modules/auth/*"
+      ],
+      "@billing/*": [
+        "src/modules/billing/*"
+      ],
       "@inventory/*": [
         "src/modules/inventory/*"
+      ],
+      "@mail/*": [
+        "src/modules/mail/*"
+      ],
+      "@orders/*": [
+        "src/modules/orders/*"
       ]
     }
   }
