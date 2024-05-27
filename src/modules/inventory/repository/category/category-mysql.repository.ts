@@ -1,154 +1,219 @@
 import { Injectable } from '@nestjs/common';
-import { Category as CategoryModel, Image as ImageModel } from '@prisma/client';
-import { CategoryRepository } from './category.repository';
-import { Category, Image } from '../../entities';
-import { PrismaService } from 'src/common/prisma/prisma.service';
+import {
+  Category as CategoryModel,
+  Image as ImageModel,
+  PrismaClient,
+} from '@prisma/client';
+import { CategoryRepository } from '@inventory/repository';
+import { Category, Image } from '@inventory/entities';
+import { PrismaService } from '@common/prisma';
 
 type MapperProps = {
   categoryModel?: CategoryModel;
   imageModel?: ImageModel;
 };
 
+class RequiredCategoryIdException extends Error {
+  constructor() {
+    super('category id not provided');
+    this.name = 'RequiredCategoryIdException';
+  }
+}
+
+class RequiredImageIdException extends Error {
+  constructor() {
+    super('image id not provided');
+    this.name = 'RequiredImageIdException';
+  }
+}
+
+class RequiredCategoryNameException extends Error {
+  constructor() {
+    super('category name not provided');
+    this.name = 'RequiredCategoryNameException';
+  }
+}
+
 @Injectable()
 export class CategoryMysqlRepository implements CategoryRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(category: Category): Promise<Category> {
-    const transaction: MapperProps = await this.prismaService.$transaction(
-      async (tx) => {
-        const { name, enable } = category;
+    try {
+      const transaction: MapperProps = await this.prismaService.$transaction(
+        async (tx: PrismaClient) => {
+          const { name, enable, image } = category;
 
-        let imageModel: ImageModel = null;
+          // Salva a imagem caso seja fornecida
+          const imageModel = image
+            ? await this.createOrUpdateImage(tx, image)
+            : null;
 
-        if (!!category.image) {
-          const { bytes, mimetype } = category.image;
-
-          imageModel = await tx.image.create({
+          // Criar o modelo de categoria, associando o modelo de imagem, se existir
+          const categoryModel: CategoryModel = await tx.category.create({
             data: {
-              bytes,
-              mimetype,
+              name,
+              enable,
+              image_id: imageModel?.id,
             },
           });
-        }
 
-        const categoryModel: CategoryModel = await tx.category.create({
-          data: {
-            name,
-            enable,
-            image_id: imageModel?.id,
-          },
-        });
+          // Retornar modelos de categoria e imagem
+          return { categoryModel, imageModel };
+        },
+      );
 
-        return { categoryModel, imageModel };
-      },
-    );
-
-    return this.#map(transaction);
+      return this.#map(transaction);
+    } catch (error) {
+      console.error('An error occurred while creating category', error);
+      throw error;
+    }
   }
 
   async update(category: Category): Promise<Category> {
-    if (!category) return;
+    try {
+      if (!category.id) throw new RequiredCategoryIdException();
 
-    ///////
-    const transaction: MapperProps = await this.prismaService.$transaction(
-      async (tx) => {
-        const { name, image } = category;
+      const transaction: MapperProps = await this.prismaService.$transaction(
+        async (tx: PrismaClient) => {
+          const { id, name, image } = category;
 
-        let imageModel: ImageModel = null;
+          let imageModel: ImageModel | null = null;
 
-        if (!!image?.bytes && !!image?.mimetype) {
-          const { bytes, mimetype } = image;
-
-          if (image.id) {
-            imageModel = await tx.image.update({
-              where: { id: image.id },
-              data: {
-                bytes,
-                mimetype,
-              },
-            });
-          } else {
-            imageModel = await tx.image.create({
-              data: {
-                bytes,
-                mimetype,
-              },
-            });
+          if (image?.bytes && image?.mimetype) {
+            imageModel = await this.createOrUpdateImage(tx, image);
+          } else if (image?.id === null) {
+            imageModel = null;
           }
-        }
 
-        const categoryModel: CategoryModel = await tx.category.update({
-          where: { id: category.id },
-          data: {
-            name,
-            image_id: imageModel?.id || category.image?.id,
-          },
-        });
+          // Atualiza a categoria, associando ou removendo o modelo de imagem
+          const categoryModel = await tx.category.update({
+            where: { id },
+            data: {
+              name,
+              image_id: imageModel?.id ?? undefined,
+            },
+          });
 
-        return { categoryModel, imageModel };
-      },
-    );
+          // Retornar modelos de categoria e imagem
+          return { categoryModel, imageModel };
+        },
+      );
 
-    //////
-    return this.#map(transaction);
+      return this.#map(transaction);
+    } catch (error) {
+      console.error('An error occurred while updating category', error);
+      throw error;
+    }
   }
 
   async enable(category_id: string, enable: boolean): Promise<void> {
-    await this.prismaService.category.update({
-      where: { id: category_id },
-      data: {
-        enable,
-      },
-    });
+    try {
+      if (!category_id) throw new RequiredCategoryIdException();
+
+      await this.prismaService.category.update({
+        where: { id: category_id },
+        data: {
+          enable,
+        },
+      });
+    } catch (error) {
+      console.error('An error occurred while toggle enable category', error);
+      throw error;
+    }
   }
 
   async findAll(): Promise<Category[]> {
-    const categories: CategoryModel[] =
-      await this.prismaService.category.findMany();
-    return categories.map((categoryModel) => this.#map({ categoryModel }));
+    try {
+      const categories = await this.prismaService.category.findMany();
+      return categories.map((categoryModel) => this.#map({ categoryModel }));
+    } catch (error) {
+      console.error('An error occurred while find all categories', error);
+      throw error;
+    }
   }
 
-  async findById(id: string): Promise<Category> {
-    if (!id) return;
-    const categoryModel = await this.prismaService.category.findFirst({
-      where: { id },
-    });
-    return this.#map({ categoryModel });
+  async findById(category_id: string): Promise<Category> {
+    try {
+      if (!category_id) throw new RequiredCategoryIdException();
+      const categoryModel = await this.prismaService.category.findFirst({
+        where: { id: category_id },
+      });
+      return this.#map({ categoryModel });
+    } catch (error) {
+      console.error('An error occurred when searching fro a category', error);
+      throw error;
+    }
   }
 
   async findByName(name: string): Promise<Category> {
-    if (!name) return;
+    try {
+      if (!name) throw new RequiredCategoryNameException();
 
-    const categoryModel = await this.prismaService.category.findFirst({
-      where: { name },
-    });
+      const categoryModel = await this.prismaService.category.findFirst({
+        where: { name },
+      });
 
-    // Prisma does not offer support for case-insensitive filtering with SQLite. :(
-    return this.#map({ categoryModel });
+      // Prisma does not offer support for case-insensitive filtering with SQLite. :(
+      return this.#map({ categoryModel });
+    } catch (error) {
+      console.error(
+        'An error occurred while updating the name category',
+        error,
+      );
+      throw error;
+    }
   }
 
-  async remove(id: string): Promise<void> {
-    if (!id) return;
-    const category = await this.findById(id);
+  async remove(category_id: string): Promise<void> {
+    try {
+      if (!category_id) throw new RequiredCategoryIdException();
 
-    await this.prismaService.$transaction(async (tx) => {
-      if (category?.id) {
-        await tx.category.delete({ where: { id } });
-        if (category.image?.id) {
-          await tx.image.delete({ where: { id: category.image.id } });
+      const category = await this.findById(category_id);
+
+      await this.prismaService.$transaction(async (tx) => {
+        if (category?.id) {
+          await tx.category.delete({ where: { id: category_id } });
+          if (category.image?.id) {
+            await tx.image.delete({ where: { id: category.image.id } });
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      console.error('An error occurred while removing the category', error);
+      throw error;
+    }
   }
 
   async getImage(image_id: string): Promise<Image> {
-    if (!image_id) return;
+    try {
+      if (!image_id) throw new RequiredImageIdException();
 
-    const imageModel = await this.prismaService.image.findFirst({
-      where: { id: image_id },
-    });
+      const imageModel = await this.prismaService.image.findFirst({
+        where: { id: image_id },
+      });
 
-    return this.#mapImage({ imageModel });
+      return this.#mapImage({ imageModel });
+    } catch (error) {
+      console.error(
+        'An error occurred getting an image from the category',
+        error,
+      );
+      throw error;
+    }
+  }
+
+  private async createOrUpdateImage(tx: PrismaClient, image: Image) {
+    const { id, bytes, mimetype } = image;
+
+    if (id) {
+      return tx.image.update({
+        where: { id },
+        data: { bytes, mimetype },
+      });
+    }
+
+    return tx.image.create({ data: { bytes, mimetype } });
   }
 
   #map({ categoryModel, imageModel }: MapperProps) {
