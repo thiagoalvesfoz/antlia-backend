@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { Image as ImageModel, Product as ProducModel } from '@prisma/client';
+import {
+  Image as ImageModel,
+  PrismaClient,
+  Product as ProducModel,
+} from '@prisma/client';
 import { ProductRepository } from './product.repository';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Image, Product } from '../../entities';
+import { RequiredImageIdException } from '@inventory/exceptions';
 
 type ProductModelMapper = ProducModel & {
   category: {
@@ -15,25 +20,57 @@ export class ProductMysqlRepository implements ProductRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(product: Product): Promise<Product> {
-    const { name, availability, category_id, price } = product;
+    try {
+      const transaction = await this.prismaService.$transaction(
+        async (tx: PrismaClient) => {
+          const { name, category_id, price, availability, image } = product;
 
-    const producModel = await this.prismaService.product.create({
-      data: {
-        name,
-        price,
-        availability,
-        category_id,
-      },
-      include: {
-        category: {
-          select: {
-            name: true,
-          },
+          // Salva a imagem caso seja fornecida
+          const imageModel = image
+            ? await this.createOrUpdateImage(tx, image)
+            : null;
+
+          // Criar o modelo de produto, associando o modelo de imagem, se existir
+          const productModel: ProductModelMapper = await tx.product.create({
+            data: {
+              name,
+              price,
+              availability,
+              category_id,
+              image_id: imageModel?.id,
+            },
+            include: {
+              category: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          });
+
+          // Retornar modelos de categoria e imagem
+          return productModel;
         },
-      },
-    });
+      );
 
-    return this.#map(producModel);
+      return this.#map(transaction);
+    } catch (error) {
+      console.error('An error occurred while creating product', error);
+      throw error;
+    }
+  }
+
+  private async createOrUpdateImage(tx: PrismaClient, image: Image) {
+    const { id, bytes, mimetype } = image;
+
+    if (id) {
+      return tx.image.update({
+        where: { id },
+        data: { bytes, mimetype },
+      });
+    }
+
+    return tx.image.create({ data: { bytes, mimetype } });
   }
 
   async findAll(): Promise<Product[]> {
@@ -130,15 +167,25 @@ export class ProductMysqlRepository implements ProductRepository {
   async remove(id: string): Promise<void> {
     if (!id) return;
 
-    await this.prismaService.category.delete({ where: { id } });
+    await this.prismaService.product.delete({ where: { id } });
   }
 
-  async saveImage(product: Product): Promise<void> {
-    throw new Error('implementar');
-  }
+  async getImage(image_id: string): Promise<Image> {
+    try {
+      if (!image_id) throw new RequiredImageIdException();
 
-  async getImage(product_id: string): Promise<Image> {
-    throw new Error('implementar');
+      const imageModel = await this.prismaService.image.findFirst({
+        where: { id: image_id },
+      });
+
+      return this.#mapImage(imageModel);
+    } catch (error) {
+      console.error(
+        'An error occurred getting an image from the category',
+        error,
+      );
+      throw error;
+    }
   }
 
   #map(producModel: ProductModelMapper): Product {
@@ -150,6 +197,7 @@ export class ProductMysqlRepository implements ProductRepository {
           availability: producModel.availability,
           category_id: producModel.category_id,
           category_name: producModel.category.name,
+          image_id: producModel.image_id,
           created_at: producModel.created_at,
           updated_at: producModel.updated_at,
         })

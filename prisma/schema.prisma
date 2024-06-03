@@ -99,7 +99,7 @@ model Product {
 
 model Image {
   id         String    @id @default(uuid())
-  bytes      Bytes?    @db.Blob
+  bytes      Bytes?    @db.LongBlob
   mimetype   String    @db.VarChar(15)
   Product    Product?
   Category   Category?

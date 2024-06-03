@@ -33,8 +33,26 @@ export class ProductsController {
 
   @Post()
   @Roles(Role.ADMIN)
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  @UseInterceptors(FileInterceptor('image'))
+  create(
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: false,
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5000000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg|image/png' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
+    @Body() createProductDto: CreateProductDto,
+  ) {
+    const product = CreateProductDto.transform(createProductDto);
+
+    return this.productsService.create({
+      ...product,
+      image,
+    });
   }
 
   @Get()
@@ -63,25 +81,6 @@ export class ProductsController {
   @Delete(':product_id')
   remove(@Param('product_id') product_id: string) {
     return this.productsService.remove(product_id);
-  }
-
-  @Roles(Role.ADMIN)
-  @Post(':product_id/upload-image')
-  @HttpCode(200)
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(
-    @Param('product_id') product_id: string,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 5000000 }),
-          new FileTypeValidator({ fileType: 'image/jpeg|image/png' }),
-        ],
-      }),
-    )
-    file: Express.Multer.File,
-  ) {
-    await this.productsService.uploadImage(product_id, file);
   }
 
   @Public()

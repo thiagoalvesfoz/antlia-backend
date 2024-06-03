@@ -4,6 +4,7 @@ import { Image } from './image.entity';
 type ProductProps = {
   id?: string;
   category_id: string;
+  image_id?: string;
   category_name: string;
   name: string;
   price: number;
@@ -19,6 +20,7 @@ export class Product {
   name: string;
   price: number;
   availability: boolean;
+  image_id: string;
   image?: Image;
   created_at?: Date;
   updated_at?: Date;
@@ -29,6 +31,7 @@ export class Product {
     this.updatePrice(props.price);
     this.updateAvailability(props.availability);
     this.addCategory({ ...props });
+    this.image_id = props.image_id;
     this.created_at = props.created_at;
     this.updated_at = props.updated_at;
   }
@@ -56,7 +59,7 @@ export class Product {
 
   updatePrice(price: number) {
     const min = 0.01;
-    const max = 999999999.99;
+    const max = 9999999.99;
 
     if (!price) {
       throw new InvalidAttributeException('price is required');
@@ -68,7 +71,7 @@ export class Product {
       );
     }
 
-    this.price = price;
+    this.price = parseFloat(price.toFixed(2));
   }
 
   updateAvailability(availability = true) {

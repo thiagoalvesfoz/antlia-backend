@@ -9,6 +9,5 @@ export interface ProductRepository {
   findByCategoryId(category_id: string): Promise<Product[]>;
   update(product: Product): Promise<Product>;
   remove(product_id: string): Promise<void>;
-  getImage(product_id: string): Promise<Image>;
-  saveImage(product: Product): Promise<void>;
+  getImage(image_id: string): Promise<Image>;
 }
