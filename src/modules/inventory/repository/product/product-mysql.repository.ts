@@ -1,13 +1,16 @@
-import { Injectable } from '@nestjs/common';
 import {
   Image as ImageModel,
   PrismaClient,
   Product as ProducModel,
 } from '@prisma/client';
+import {
+  RequiredImageIdException,
+  RequiredProductIdException,
+} from '@inventory/exceptions';
+import { Injectable } from '@nestjs/common';
 import { ProductRepository } from './product.repository';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Image, Product } from '../../entities';
-import { RequiredImageIdException } from '@inventory/exceptions';
 
 type ProductModelMapper = ProducModel & {
   category: {
@@ -140,33 +143,50 @@ export class ProductMysqlRepository implements ProductRepository {
   }
 
   async update(product: Product): Promise<Product> {
-    if (!product || !product.id) return;
+    try {
+      if (!product.id) throw new RequiredProductIdException();
 
-    const { name, availability, category_id, price } = product;
+      const productModel = await this.prismaService.$transaction(
+        async (tx: PrismaClient) => {
+          const { id, name, availability, category_id, price, image } = product;
 
-    const categoryModel = await this.prismaService.product.update({
-      where: { id: product.id },
-      data: {
-        name,
-        availability,
-        category_id,
-        price,
-      },
-      include: {
-        category: {
-          select: {
-            name: true,
-          },
+          let imageModel: ImageModel | null = null;
+
+          if (image?.bytes && image?.mimetype) {
+            imageModel = await this.createOrUpdateImage(tx, image);
+          } else if (image?.id === null) {
+            imageModel = null;
+          }
+
+          return await tx.product.update({
+            where: { id },
+            data: {
+              name,
+              availability,
+              category_id,
+              price,
+              image_id: imageModel?.id ?? undefined,
+            },
+            include: {
+              category: {
+                select: {
+                  name: true,
+                },
+              },
+            },
+          });
         },
-      },
-    });
+      );
 
-    return this.#map(categoryModel);
+      return this.#map(productModel);
+    } catch (error) {
+      console.error('An error occurred while updating product', error);
+      throw error;
+    }
   }
 
   async remove(id: string): Promise<void> {
     if (!id) return;
-
     await this.prismaService.product.delete({ where: { id } });
   }
 

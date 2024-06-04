@@ -7,8 +7,9 @@ export interface CategoryRepository {
   findAll(): Promise<Category[]>;
   findById(category_id: string): Promise<Category>;
   update(category: Category): Promise<Category>;
-  remove(category_id: string): Promise<void>;
+  remove(category: Category): Promise<void>;
   findByName(name: string): Promise<Category>;
   getImage(image_id: string): Promise<Image>;
   enable(category_id: string, enable: boolean): Promise<void>;
+  countProductsByCategory(category_id): Promise<number>;
 }

@@ -1,4 +1,3 @@
-import { BusinessRuleException } from '@common/exceptions/business-rule.exception';
 import { Transform } from 'class-transformer';
 import {
   IsBoolean,

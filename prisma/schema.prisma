@@ -67,7 +67,7 @@ model Category {
   enable  Boolean   @default(true)
   Product Product[]
 
-  Image    Image?  @relation(fields: [image_id], references: [id])
+  Image    Image?  @relation(fields: [image_id], references: [id], onDelete: Cascade)
   image_id String? @unique
 
   created_at DateTime @default(now())
@@ -86,7 +86,7 @@ model Product {
   category    Category @relation(fields: [category_id], references: [id])
   category_id String
 
-  Image    Image?  @relation(fields: [image_id], references: [id])
+  image    Image?  @relation(fields: [image_id], references: [id], onDelete: Cascade)
   image_id String? @unique
 
   created_at DateTime    @default(now())
@@ -101,8 +101,8 @@ model Image {
   id         String    @id @default(uuid())
   bytes      Bytes?    @db.LongBlob
   mimetype   String    @db.VarChar(15)
-  Product    Product?
-  Category   Category?
+  product    Product?
+  category   Category?
   created_at DateTime  @default(now())
   updated_at DateTime  @default(now()) @updatedAt
 

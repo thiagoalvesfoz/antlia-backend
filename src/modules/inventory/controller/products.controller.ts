@@ -48,11 +48,7 @@ export class ProductsController {
     @Body() createProductDto: CreateProductDto,
   ) {
     const product = CreateProductDto.transform(createProductDto);
-
-    return this.productsService.create({
-      ...product,
-      image,
-    });
+    return this.productsService.create({ ...product, image });
   }
 
   @Get()
@@ -69,11 +65,23 @@ export class ProductsController {
 
   @Put(':product_id')
   @Roles(Role.ADMIN)
+  @UseInterceptors(FileInterceptor('image'))
   update(
-    @Param('product_id') product_id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: false,
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 5000000 }),
+          new FileTypeValidator({ fileType: 'image/jpeg|image/png' }),
+        ],
+      }),
+    )
+    image: Express.Multer.File,
     @Body() updateProductDto: UpdateProductDto,
+    @Param('product_id') product_id: string,
   ) {
-    return this.productsService.update(product_id, updateProductDto);
+    const product = UpdateProductDto.transform(updateProductDto);
+    return this.productsService.update(product_id, { ...product, image });
   }
 
   @Roles(Role.ADMIN)

@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common';
 import {
   Category as CategoryModel,
   Image as ImageModel,
   PrismaClient,
 } from '@prisma/client';
+import {
+  RequiredCategoryIdException,
+  RequiredCategoryNameException,
+  RequiredImageIdException,
+} from '@inventory/exceptions';
+import { Injectable } from '@nestjs/common';
 import { CategoryRepository } from '@inventory/repository';
 import { Category, Image } from '@inventory/entities';
 import { PrismaService } from '@common/prisma';
@@ -12,27 +17,6 @@ type MapperProps = {
   categoryModel?: CategoryModel;
   imageModel?: ImageModel;
 };
-
-class RequiredCategoryIdException extends Error {
-  constructor() {
-    super('category id not provided');
-    this.name = 'RequiredCategoryIdException';
-  }
-}
-
-class RequiredImageIdException extends Error {
-  constructor() {
-    super('image id not provided');
-    this.name = 'RequiredImageIdException';
-  }
-}
-
-class RequiredCategoryNameException extends Error {
-  constructor() {
-    super('category name not provided');
-    this.name = 'RequiredCategoryNameException';
-  }
-}
 
 @Injectable()
 export class CategoryMysqlRepository implements CategoryRepository {
@@ -165,18 +149,21 @@ export class CategoryMysqlRepository implements CategoryRepository {
     }
   }
 
-  async remove(category_id: string): Promise<void> {
-    try {
-      if (!category_id) throw new RequiredCategoryIdException();
+  async countProductsByCategory(category_id: any): Promise<number> {
+    return await this.prismaService.product.count({ where: { category_id } });
+  }
 
-      const category = await this.findById(category_id);
+  async remove(category: Category): Promise<void> {
+    try {
+      if (!category?.id) throw new RequiredCategoryIdException();
+
+      const { id, image } = category;
 
       await this.prismaService.$transaction(async (tx) => {
-        if (category?.id) {
-          await tx.category.delete({ where: { id: category_id } });
-          if (category.image?.id) {
-            await tx.image.delete({ where: { id: category.image.id } });
-          }
+        await tx.category.delete({ where: { id } });
+
+        if (image?.id) {
+          await tx.image.delete({ where: { id: image.id } });
         }
       });
     } catch (error) {

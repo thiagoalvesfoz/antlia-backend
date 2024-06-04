@@ -70,8 +70,18 @@ export class CategoriesService {
   }
 
   async remove(category_id: string): Promise<void> {
-    await this.#getCategoryById(category_id);
-    await this.categoryRepository.remove(category_id);
+    const category = await this.#getCategoryById(category_id);
+
+    const hasRegisteredProducts =
+      await this.categoryRepository.countProductsByCategory(category.id);
+
+    if (!!hasRegisteredProducts) {
+      throw new BusinessRuleException(
+        'FK: It is not possible to delete categories with registered products',
+      );
+    }
+
+    await this.categoryRepository.remove(category);
   }
 
   async getImage(category_id: string) {

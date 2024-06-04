@@ -79,6 +79,11 @@ export class ProductsService {
       });
     }
 
+    if (updateProductDto.image) {
+      const { image } = updateProductDto;
+      product.addImage(image.buffer, image.mimetype);
+    }
+
     product.updateName(updateProductDto.name);
     product.updatePrice(updateProductDto.price);
     product.updateAvailability(updateProductDto.availability);

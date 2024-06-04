@@ -18,3 +18,10 @@ export class RequiredCategoryNameException extends Error {
     this.name = 'RequiredCategoryNameException';
   }
 }
+
+export class RequiredProductIdException extends Error {
+  constructor(msg = 'product id not provided') {
+    super(msg);
+    this.name = 'RequiredProductIdException';
+  }
+}
