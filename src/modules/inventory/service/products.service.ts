@@ -4,14 +4,15 @@ import { ProductRepository, PRODUCT_NAME_PROVIDER } from '../repository';
 import { BusinessRuleException } from 'src/common/exceptions/business-rule.exception';
 import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import { UpdateProductDto } from '../dto/update-product.dto';
-import { Product } from '../entities';
+import { Product, ProductStatus } from '../entities';
+import { UpdateProductStatusDto } from '@inventory/dto/update-product-status.dto';
 
 type ProductInput = {
   image?: Express.Multer.File;
   category_id: string;
   name: string;
   price: number;
-  availability: boolean;
+  status: ProductStatus;
 };
 
 @Injectable()
@@ -36,7 +37,7 @@ export class ProductsService {
       category_name: category.name,
       name: createProduct.name,
       price: createProduct.price,
-      availability: createProduct.availability,
+      status: createProduct.status,
     });
 
     if (createProduct.image) {
@@ -59,6 +60,15 @@ export class ProductsService {
 
   async findAllProductsByCategory(categoryId: string) {
     return await this.productRepository.findByCategoryId(categoryId);
+  }
+
+  async updateStatus(
+    product_id: string,
+    updateProductStatus: UpdateProductStatusDto,
+  ) {
+    const product = await this.findOne(product_id);
+    product.updateStatus(updateProductStatus.status);
+    await this.productRepository.update(product);
   }
 
   async update(product_id: string, updateProductDto: UpdateProductDto) {
@@ -86,14 +96,14 @@ export class ProductsService {
 
     product.updateName(updateProductDto.name);
     product.updatePrice(updateProductDto.price);
-    product.updateAvailability(updateProductDto.availability);
+    product.updateStatus(updateProductDto.status);
 
     return await this.productRepository.update(product);
   }
 
   async remove(product_id: string) {
-    await this.findOne(product_id);
-    await this.productRepository.remove(product_id);
+    const product = await this.findOne(product_id);
+    await this.productRepository.remove(product);
   }
 
   async getImage(product_id: string) {

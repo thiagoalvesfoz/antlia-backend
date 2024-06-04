@@ -1,6 +1,11 @@
 import { InvalidAttributeException } from 'src/common/exceptions/invalid-attribute-exception';
 import { Image } from './image.entity';
 
+export enum ProductStatus {
+  PUBLISHED = 'PUBLISHED',
+  UNPUBLISHED = 'UNPUBLISHED',
+}
+
 type ProductProps = {
   id?: string;
   category_id: string;
@@ -8,7 +13,7 @@ type ProductProps = {
   category_name: string;
   name: string;
   price: number;
-  availability: boolean;
+  status: ProductStatus;
   created_at?: Date;
   updated_at?: Date;
 };
@@ -19,7 +24,7 @@ export class Product {
   category_name: string;
   name: string;
   price: number;
-  availability: boolean;
+  status: ProductStatus;
   image_id: string;
   image?: Image;
   created_at?: Date;
@@ -29,8 +34,8 @@ export class Product {
     this.id = props.id;
     this.updateName(props.name);
     this.updatePrice(props.price);
-    this.updateAvailability(props.availability);
     this.addCategory({ ...props });
+    this.updateStatus(props.status);
     this.image_id = props.image_id;
     this.created_at = props.created_at;
     this.updated_at = props.updated_at;
@@ -74,8 +79,9 @@ export class Product {
     this.price = parseFloat(price.toFixed(2));
   }
 
-  updateAvailability(availability = true) {
-    this.availability = availability;
+  updateStatus(status: ProductStatus) {
+    if (!status) return;
+    this.status = status;
   }
 
   addImage(bytes: Buffer, mimetype: string) {

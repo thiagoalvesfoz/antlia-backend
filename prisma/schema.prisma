@@ -81,7 +81,7 @@ model Product {
   id           String  @id @default(uuid())
   name         String  @unique
   price        Decimal @db.Decimal(9, 2)
-  availability Boolean @default(true)
+  status       ProductStatus @default(UNPUBLISHED)
 
   category    Category @relation(fields: [category_id], references: [id])
   category_id String
@@ -174,4 +174,9 @@ enum PayStatus {
   PENDING
   PARTLY_PAID
   CANCELED
+}
+
+enum ProductStatus {
+  PUBLISHED
+  UNPUBLISHED
 }

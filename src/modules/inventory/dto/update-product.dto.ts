@@ -1,8 +1,10 @@
+import { ProductStatus } from '@inventory/entities';
 import { Transform } from 'class-transformer';
 import {
-  IsBoolean,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsUUID,
   Length,
   Max,
@@ -26,17 +28,16 @@ export class UpdateProductDto {
   @Transform(({ value }) => Number(value))
   price: number;
 
-  @IsBoolean()
-  @Transform(({ value }) => value === 'true' || value === '1')
-  availability: boolean;
+  @IsOptional()
+  @IsEnum(ProductStatus)
+  status: ProductStatus;
 
   static transform(dto: UpdateProductDto) {
-    const { availability, price, ...product } = dto;
+    const { price, ...product } = dto;
 
     return {
       ...product,
       price: Number(price),
-      availability: ['true', '1'].includes('' + availability),
     };
   }
 }

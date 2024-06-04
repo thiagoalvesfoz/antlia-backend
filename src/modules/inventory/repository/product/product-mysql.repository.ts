@@ -11,6 +11,7 @@ import { Injectable } from '@nestjs/common';
 import { ProductRepository } from './product.repository';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Image, Product } from '../../entities';
+import { ProductStatus } from '@inventory/entities/product.entity';
 
 type ProductModelMapper = ProducModel & {
   category: {
@@ -26,7 +27,7 @@ export class ProductMysqlRepository implements ProductRepository {
     try {
       const transaction = await this.prismaService.$transaction(
         async (tx: PrismaClient) => {
-          const { name, category_id, price, availability, image } = product;
+          const { name, category_id, price, status, image } = product;
 
           // Salva a imagem caso seja fornecida
           const imageModel = image
@@ -38,7 +39,7 @@ export class ProductMysqlRepository implements ProductRepository {
             data: {
               name,
               price,
-              availability,
+              status,
               category_id,
               image_id: imageModel?.id,
             },
@@ -148,7 +149,7 @@ export class ProductMysqlRepository implements ProductRepository {
 
       const productModel = await this.prismaService.$transaction(
         async (tx: PrismaClient) => {
-          const { id, name, availability, category_id, price, image } = product;
+          const { id, name, status, category_id, price, image } = product;
 
           let imageModel: ImageModel | null = null;
 
@@ -162,7 +163,7 @@ export class ProductMysqlRepository implements ProductRepository {
             where: { id },
             data: {
               name,
-              availability,
+              status,
               category_id,
               price,
               image_id: imageModel?.id ?? undefined,
@@ -185,9 +186,23 @@ export class ProductMysqlRepository implements ProductRepository {
     }
   }
 
-  async remove(id: string): Promise<void> {
-    if (!id) return;
-    await this.prismaService.product.delete({ where: { id } });
+  async remove(product: Product): Promise<void> {
+    try {
+      if (!product?.id) throw new RequiredProductIdException();
+
+      const { id, image } = product;
+
+      await this.prismaService.$transaction(async (tx) => {
+        await tx.product.delete({ where: { id } });
+
+        if (image?.id) {
+          await tx.image.delete({ where: { id: image.id } });
+        }
+      });
+    } catch (error) {
+      console.error('An error occurred while removing the product', error);
+      throw error;
+    }
   }
 
   async getImage(image_id: string): Promise<Image> {
@@ -214,7 +229,7 @@ export class ProductMysqlRepository implements ProductRepository {
           id: producModel.id,
           name: producModel.name,
           price: Number(producModel.price),
-          availability: producModel.availability,
+          status: ProductStatus[producModel.status],
           category_id: producModel.category_id,
           category_name: producModel.category.name,
           image_id: producModel.image_id,

@@ -1,5 +1,5 @@
 import { Category } from './category.entity';
-import { Product } from './product.entity';
+import { Product, ProductStatus } from './product.entity';
 import { Image } from './image.entity';
 
-export { Category, Product, Image };
+export { Category, Product, ProductStatus, Image };

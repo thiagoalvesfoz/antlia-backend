@@ -15,16 +15,17 @@ import {
   FileTypeValidator,
   Res,
   StreamableFile,
+  Patch,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
-
 import { ProductsService } from '../service/products.service';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Role, Roles } from 'src/common/decorators/role.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
+import { UpdateProductStatusDto } from '@inventory/dto/update-product-status.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -89,6 +90,16 @@ export class ProductsController {
   @Delete(':product_id')
   remove(@Param('product_id') product_id: string) {
     return this.productsService.remove(product_id);
+  }
+
+  @Roles(Role.ADMIN)
+  @HttpCode(204)
+  @Patch(':product_id/status')
+  updateStatus(
+    @Param('product_id') product_id: string,
+    @Body() updateProductStatus: UpdateProductStatusDto,
+  ) {
+    return this.productsService.updateStatus(product_id, updateProductStatus);
   }
 
   @Public()

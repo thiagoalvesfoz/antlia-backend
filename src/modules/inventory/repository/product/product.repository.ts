@@ -8,6 +8,6 @@ export interface ProductRepository {
   findById(product_id: string): Promise<Product>;
   findByCategoryId(category_id: string): Promise<Product[]>;
   update(product: Product): Promise<Product>;
-  remove(product_id: string): Promise<void>;
+  remove(product: Product): Promise<void>;
   getImage(image_id: string): Promise<Image>;
 }
