@@ -108,9 +108,6 @@ export class ProductsService {
 
   async getImage(product_id: string) {
     const product = await this.findOne(product_id);
-
-    console.log('Product -> ', product);
-
     const image = await this.productRepository.getImage(product.image_id);
     if (!image) throw new ResourceNotFoundException('image not found');
     return image;

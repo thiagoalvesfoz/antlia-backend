@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma/prisma.service';
-import { UserRepository } from '../domain/repository/users.repository';
+import { UserRepository } from '@account/domain/users.repository';
 import { Profile as ProfileModel, User as UserModel } from '@prisma/client';
-import { Role } from '../domain/entity/role.entity';
-import { User } from '../domain/entity/user.entity';
+import { Role, User } from '@account/domain/entity';
 
 type RolesProps = {
   role: {

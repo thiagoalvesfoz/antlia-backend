@@ -1,5 +1,4 @@
-import { Role } from '../entity/role.entity';
-import { User } from '../entity/user.entity';
+import { Role, User } from './entity';
 
 export const USER_NAME_PROVIDER = 'UserRepository';
 

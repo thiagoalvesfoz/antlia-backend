@@ -2,14 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   UserRepository,
   USER_NAME_PROVIDER,
-} from './repository/users.repository';
+} from '@account/domain/users.repository';
 import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-found.exception';
 import { BusinessRuleException } from 'src/common/exceptions/business-rule.exception';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Profile } from './entity/profile.entity';
+import { Profile, User, Role } from '@account/domain/entity';
 import { UserDto } from './dto/user-response.dto';
-import { User } from './entity/user.entity';
-import { Role } from './entity/role.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
@@ -31,20 +29,14 @@ export class UsersService {
       cell_phone,
     } = createUserDto;
 
+    // Validação de senha
     if (password !== password_confirmation) {
       throw new BusinessRuleException(
         'password and password_confirmation does not match',
       );
     }
 
-    const userAlreadyExists = await this.userRepository.findByUsername(
-      username,
-    );
-
-    if (!!userAlreadyExists) {
-      throw new BusinessRuleException('username already exists');
-    }
-
+    // Validação de email
     const isEmailExists: boolean = await this.userRepository.isEmailExists(
       email,
     );
@@ -52,24 +44,35 @@ export class UsersService {
       throw new BusinessRuleException('email already exists');
     }
 
-    const assigned_roles = await this.asignRoles(roles);
+    // Validação de username
+    const userAlreadyExists = await this.userRepository.findByUsername(
+      username,
+    );
+    if (userAlreadyExists) {
+      throw new BusinessRuleException('username already exists');
+    }
 
-    const register = new User({
+    // Atribuição de roles
+    const assigned_roles = await this.assignRoles(roles);
+
+    // Criação do usuário
+    const newUser = new User({
       username,
       password,
       roles: assigned_roles,
       profile: new Profile({ name, email, cell_phone }),
     });
 
-    register.encrypt_password();
+    newUser.encrypt_password();
 
-    const user = await this.userRepository.create(register);
+    const createdUser = await this.userRepository.create(newUser);
 
-    return UserDto.build(user);
+    // Mapeamento para DTO
+    return UserDto.build(createdUser);
   }
 
   async update(user_id: string, updateUserDto: UpdateUserDto) {
-    let user = await this.userRepository.findById(user_id);
+    const user = await this.userRepository.findById(user_id);
 
     if (!user) {
       throw new ResourceNotFoundException('user not found');
@@ -77,16 +80,18 @@ export class UsersService {
 
     const { username, roles, name, email, cell_phone } = updateUserDto;
 
+    // Validação de username
     if (user.username !== username) {
       const userAlreadyExists = await this.userRepository.findByUsername(
         username,
       );
 
-      if (!!userAlreadyExists) {
+      if (userAlreadyExists) {
         throw new BusinessRuleException('username already exists');
       }
     }
 
+    // Validação de email
     if (user.profile.email !== email) {
       const isEmailExists: boolean = await this.userRepository.isEmailExists(
         email,
@@ -96,8 +101,10 @@ export class UsersService {
       }
     }
 
-    const assigned_roles = await this.asignRoles(roles);
+    // Atribuição de roles
+    const assigned_roles = await this.assignRoles(roles);
 
+    // Atualização do usuário
     const userToUpdate = new User({
       id: user.id,
       username,
@@ -106,30 +113,10 @@ export class UsersService {
       profile: new Profile({ name, email, cell_phone }),
     });
 
-    user = await this.userRepository.update(userToUpdate);
-    return UserDto.build(user);
-  }
+    const userUpdated = await this.userRepository.update(userToUpdate);
 
-  async asignRoles(roles: Role[]) {
-    if (roles.length === 0) {
-      throw new BusinessRuleException(
-        `requires at least one role before registering a new user`,
-      );
-    }
-
-    const rolesToAdd: Role[] = [];
-
-    for (const index in roles) {
-      const roleDB = await this.userRepository.findRoleByName(roles[index]);
-
-      if (!roleDB) {
-        throw new BusinessRuleException(`role '${roles[index]}' is not exists`);
-      }
-
-      rolesToAdd.push(roleDB);
-    }
-
-    return rolesToAdd;
+    // Mapeamento para DTO
+    return UserDto.build(userUpdated);
   }
 
   async findAll() {
@@ -169,5 +156,27 @@ export class UsersService {
     user.updatePassword(password);
 
     await this.userRepository.updatePassword(user);
+  }
+
+  private async assignRoles(roles: Role[]) {
+    if (roles.length === 0) {
+      throw new BusinessRuleException(
+        `requires at least one role before registering a new user`,
+      );
+    }
+
+    const assignedRoles: Role[] = [];
+
+    for (const roleName of roles) {
+      const role = await this.userRepository.findRoleByName(roleName);
+
+      if (!role) {
+        throw new BusinessRuleException(`role '${roleName}' does not exist`);
+      }
+
+      assignedRoles.push(role);
+    }
+
+    return assignedRoles;
   }
 }

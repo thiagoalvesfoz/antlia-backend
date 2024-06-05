@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UsersController } from './http/user.controller';
-import { UsersService } from './domain/users.service';
-import { AccountController } from './http/account.controller';
-import { UserRepositoryProvider } from './adapters';
+import { UsersService } from '@account/application/users.service';
+import {
+  AccountController,
+  UsersController,
+} from '@account/infrastructure/adapters/in';
+import { UserRepositoryProvider } from '@account/infrastructure/adapters/out';
 
 @Module({
   controllers: [UsersController, AccountController],

@@ -2,7 +2,7 @@ import { UserMysqlRepository } from './users-mysql.repository';
 import {
   UserRepository,
   USER_NAME_PROVIDER,
-} from '../domain/repository/users.repository';
+} from '@account/domain/users.repository';
 
 export const UserRepositoryProvider = {
   provide: USER_NAME_PROVIDER,

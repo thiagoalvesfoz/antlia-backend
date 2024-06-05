@@ -1,6 +1,6 @@
+import { UserDto } from '@common/dto/user.dto';
 import { Controller, Get, HttpStatus, Request } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UserDto } from '../domain/dto/user-response.dto';
 
 @ApiTags('Account')
 @Controller('account')

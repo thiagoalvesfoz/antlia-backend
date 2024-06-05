@@ -9,13 +9,15 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
+import {
+  CreateUserDto,
+  UpdatePasswordDto,
+  UpdateUserDto,
+  UserDto,
+} from '@account/application/dto';
 import { Role, Roles } from 'src/common/decorators/role.decorator';
-import { UsersService } from '../domain/users.service';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateUserDto } from '../domain/dto/create-user.dto';
-import { UserDto } from '../domain/dto/user-response.dto';
-import { UpdatePasswordDto } from '../domain/dto/update-password.dto';
-import { UpdateUserDto } from '../domain/dto/update-user.dto';
+import { UsersService } from '@account/application/users.service';
 
 @ApiTags('Users')
 @Controller('users')

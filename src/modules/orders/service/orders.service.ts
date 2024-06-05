@@ -9,9 +9,9 @@ import { OrderCreatedEvent } from 'src/common/events/order-created.event';
 import { ProductsService } from '../../inventory/service/products.service';
 import { CreateOrderDto } from '../dto/create-order.dto';
 import { OrderItem } from '../entities/orderItem.entity';
-import { UserDto } from 'src/modules/account/domain/dto/user-response.dto';
 import { Order } from '../entities/order.entity';
 import EventEmitter from 'events';
+import { UserDto } from '@common/dto/user.dto';
 
 const EVENT_NAME_PROVIDER = 'EventEmitter';
 

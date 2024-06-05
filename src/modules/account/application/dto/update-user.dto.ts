@@ -5,7 +5,7 @@ import {
   IsEmail,
   MaxLength,
 } from 'class-validator';
-import { Role } from '../entity/role.entity';
+import { Role } from '@account/domain/entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
