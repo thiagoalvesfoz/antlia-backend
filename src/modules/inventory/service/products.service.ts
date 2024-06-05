@@ -6,6 +6,7 @@ import { ResourceNotFoundException } from 'src/common/exceptions/resource-not-fo
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { Product, ProductStatus } from '../entities';
 import { UpdateProductStatusDto } from '@inventory/dto/update-product-status.dto';
+import { ProductsQueryParam } from '@inventory/dto/products-pagination.dto';
 
 type ProductInput = {
   image?: Express.Multer.File;
@@ -48,8 +49,8 @@ export class ProductsService {
     return await this.productRepository.create(product);
   }
 
-  async findAll() {
-    return await this.productRepository.findAll();
+  async findAll(params: ProductsQueryParam) {
+    return await this.productRepository.pagination(params);
   }
 
   async findOne(product_id: string) {

@@ -26,6 +26,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Role, Roles } from 'src/common/decorators/role.decorator';
 import { Public } from 'src/common/decorators/public.decorator';
 import { UpdateProductStatusDto } from '@inventory/dto/update-product-status.dto';
+import { ProductsQueryParam } from '@inventory/dto/products-pagination.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -53,10 +54,8 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(@Query() params: any) {
-    return params.category_id
-      ? this.productsService.findAllProductsByCategory(params.category_id)
-      : this.productsService.findAll();
+  findAll(@Query() params: ProductsQueryParam) {
+    return this.productsService.findAll(params);
   }
 
   @Get(':product_id')

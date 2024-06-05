@@ -8,10 +8,15 @@ import {
   RequiredProductIdException,
 } from '@inventory/exceptions';
 import { Injectable } from '@nestjs/common';
-import { ProductRepository } from './product.repository';
+import {
+  ProductPagination,
+  ProductQueryParam,
+  ProductRepository,
+} from './product.repository';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Image, Product } from '../../entities';
 import { ProductStatus } from '@inventory/entities/product.entity';
+import { getOffsetPagination } from '@common/pagination';
 
 type ProductModelMapper = ProducModel & {
   category: {
@@ -22,6 +27,61 @@ type ProductModelMapper = ProducModel & {
 @Injectable()
 export class ProductMysqlRepository implements ProductRepository {
   constructor(private readonly prismaService: PrismaService) {}
+  async pagination(params: ProductQueryParam): Promise<ProductPagination> {
+    const { skip, take, page, page_size } = getOffsetPagination(
+      params.page,
+      params.page_size,
+    );
+
+    const where = {
+      name: {
+        contains: params.search,
+      },
+      status: params.status,
+      category: {
+        name: params.category,
+      },
+    };
+
+    const [total_items, total_published, total_unpublished, result] =
+      (await this.prismaService.$transaction([
+        this.prismaService.product.count({ where }),
+        this.prismaService.product.count({
+          where: { ...where, status: ProductStatus.PUBLISHED },
+        }),
+        this.prismaService.product.count({
+          where: { ...where, status: ProductStatus.UNPUBLISHED },
+        }),
+        this.prismaService.product.findMany({
+          skip,
+          take,
+          where,
+          orderBy: {
+            created_at: 'desc',
+          },
+          include: {
+            category: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        }),
+      ])) as [number, number, number, ProducModel[]];
+
+    const items = result.map(this.#map);
+    const total_pages = Math.ceil(total_items / page_size);
+
+    return {
+      page: page,
+      page_size,
+      total_pages,
+      total_items,
+      total_published,
+      total_unpublished,
+      items,
+    };
+  }
 
   async create(product: Product): Promise<Product> {
     try {
