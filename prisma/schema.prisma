@@ -17,6 +17,7 @@ model User {
   password   String
   created_at DateTime       @default(now())
   updated_at DateTime       @default(now()) @updatedAt
+  enable     Boolean        @default(true)
   roles      RolesOnUsers[]
   profile    Profile?
 
@@ -78,10 +79,10 @@ model Category {
 }
 
 model Product {
-  id           String  @id @default(uuid())
-  name         String  @unique
-  price        Decimal @db.Decimal(9, 2)
-  status       ProductStatus @default(UNPUBLISHED)
+  id     String        @id @default(uuid())
+  name   String        @unique
+  price  Decimal       @db.Decimal(9, 2)
+  status ProductStatus @default(UNPUBLISHED)
 
   category    Category @relation(fields: [category_id], references: [id])
   category_id String

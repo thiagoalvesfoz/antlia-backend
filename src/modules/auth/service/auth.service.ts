@@ -15,7 +15,7 @@ export class AuthService {
     return user?.is_match_password(pass) ? user : null;
   }
 
-  async login(user: any) {
+  async login(user: any): Promise<{ access_token: string; user: UserDto }> {
     const payload = {
       sub: user.id,
       username: user.username,

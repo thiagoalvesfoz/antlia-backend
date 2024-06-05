@@ -11,6 +11,12 @@ import { UserDto } from './dto/user-response.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
+class AccountAlreadyExistsException extends BusinessRuleException {
+  constructor(field: string) {
+    super(`${field} already exists`);
+  }
+}
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -36,20 +42,16 @@ export class UsersService {
       );
     }
 
-    // Validação de email
-    const isEmailExists: boolean = await this.userRepository.isEmailExists(
+    // validação de conta
+    const userAccount = await this.userRepository.findUserAccount(
+      username,
       email,
     );
-    if (!!isEmailExists) {
-      throw new BusinessRuleException('email already exists');
-    }
 
-    // Validação de username
-    const userAlreadyExists = await this.userRepository.findByUsername(
-      username,
-    );
-    if (userAlreadyExists) {
-      throw new BusinessRuleException('username already exists');
+    if (userAccount) {
+      throw new AccountAlreadyExistsException(
+        userAccount.username === username ? 'username' : 'email',
+      );
     }
 
     // Atribuição de roles
@@ -60,6 +62,7 @@ export class UsersService {
       username,
       password,
       roles: assigned_roles,
+      enable: true,
       profile: new Profile({ name, email, cell_phone }),
     });
 
@@ -72,33 +75,20 @@ export class UsersService {
   }
 
   async update(user_id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository.findById(user_id);
-
-    if (!user) {
-      throw new ResourceNotFoundException('user not found');
-    }
+    const user = await this.findUserOrFail(user_id);
 
     const { username, roles, name, email, cell_phone } = updateUserDto;
 
-    // Validação de username
-    if (user.username !== username) {
-      const userAlreadyExists = await this.userRepository.findByUsername(
-        username,
-      );
+    // validação de conta
+    const userAccount = await this.userRepository.findUserAccount(
+      username,
+      email,
+    );
 
-      if (userAlreadyExists) {
-        throw new BusinessRuleException('username already exists');
-      }
-    }
-
-    // Validação de email
-    if (user.profile.email !== email) {
-      const isEmailExists: boolean = await this.userRepository.isEmailExists(
-        email,
+    if (userAccount.id !== user.id) {
+      throw new AccountAlreadyExistsException(
+        userAccount.username === username ? 'username' : 'email',
       );
-      if (!!isEmailExists) {
-        throw new BusinessRuleException('email already exists');
-      }
     }
 
     // Atribuição de roles
@@ -110,6 +100,7 @@ export class UsersService {
       username,
       password: user.password,
       roles: assigned_roles,
+      enable: user.enable,
       profile: new Profile({ name, email, cell_phone }),
     });
 
@@ -125,12 +116,7 @@ export class UsersService {
   }
 
   async findOne(user_id: string): Promise<UserDto> {
-    const user = await this.userRepository.findById(user_id);
-
-    if (!user) {
-      throw new ResourceNotFoundException('user not found');
-    }
-
+    const user = await this.findUserOrFail(user_id);
     return UserDto.build(user);
   }
 
@@ -139,11 +125,7 @@ export class UsersService {
   }
 
   async updatePassword(user_id: string, updatePasswordDto: UpdatePasswordDto) {
-    const user = await this.userRepository.findById(user_id);
-
-    if (!user) {
-      throw new ResourceNotFoundException('user not found');
-    }
+    const user = await this.findUserOrFail(user_id);
 
     const { password, password_confirmation } = updatePasswordDto;
 
@@ -156,6 +138,20 @@ export class UsersService {
     user.updatePassword(password);
 
     await this.userRepository.updatePassword(user);
+  }
+
+  async toggleEnableUser(user_id: string) {
+    const user = await this.findUserOrFail(user_id);
+    await this.userRepository.updateEnable(user_id, !user.enable);
+  }
+
+  private async findUserOrFail(user_id: string) {
+    const user = await this.userRepository.findById(user_id);
+
+    if (!user) {
+      throw new ResourceNotFoundException('user not found');
+    }
+    return user;
   }
 
   private async assignRoles(roles: Role[]) {

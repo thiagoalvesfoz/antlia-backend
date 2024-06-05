@@ -16,6 +16,10 @@ export class LoginStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('invalid password or user');
     }
 
+    if (!user.enable) {
+      throw new UnauthorizedException('disabled user');
+    }
+
     return user;
   }
 }

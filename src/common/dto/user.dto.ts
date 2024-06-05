@@ -9,6 +9,9 @@ export class UserDto {
   username: string;
 
   @ApiProperty()
+  enable: boolean;
+
+  @ApiProperty()
   name: string;
 
   @ApiProperty()
@@ -34,6 +37,7 @@ export class UserDto {
     this.profile_id = user.profile?.id || null;
     this.name = user.profile?.name || null;
     this.username = user.username;
+    this.enable = user.enable;
     this.email = user.profile?.email || null;
     this.cell_phone = user.profile?.cell_phone || null;
     this.created_at = user.created_at;

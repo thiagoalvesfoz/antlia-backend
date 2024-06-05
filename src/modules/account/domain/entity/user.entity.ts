@@ -10,6 +10,7 @@ export type UserProps = {
   updated_at?: Date;
   roles?: Role[];
   profile: Profile;
+  enable?: boolean;
 };
 
 export class User {
@@ -20,6 +21,7 @@ export class User {
   updated_at?: Date;
   roles?: Role[];
   profile: Profile;
+  enable: boolean;
 
   constructor(props: UserProps) {
     this.id = props.id;
@@ -29,6 +31,7 @@ export class User {
     this.created_at = props.created_at;
     this.updated_at = props.updated_at;
     this.profile = props.profile;
+    this.enable = props.enable;
   }
 
   encrypt_password() {

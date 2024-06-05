@@ -40,12 +40,13 @@ export class UserMysqlRepository implements UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(user: User): Promise<User> {
-    const { username, password, roles } = user;
+    const { username, password, enable, roles } = user;
 
     const userModel = await this.prismaService.user.create({
       data: {
         username,
         password,
+        enable,
         roles: {
           create: roles.map((role) => ({
             assigned_by: 'admin',
@@ -72,7 +73,7 @@ export class UserMysqlRepository implements UserRepository {
 
   async update(user: User): Promise<User> {
     if (!user.id) return;
-    const { id, username, password } = user;
+    const { id, username, enable, password } = user;
 
     const userModel = await this.prismaService.$transaction(async (tx) => {
       // Primeiro, removemos todas as roles antigas do usuário
@@ -85,6 +86,7 @@ export class UserMysqlRepository implements UserRepository {
         data: {
           username,
           password,
+          enable,
           profile: {
             upsert: {
               create: {
@@ -169,6 +171,17 @@ export class UserMysqlRepository implements UserRepository {
     return emailFound > 0;
   }
 
+  async findUserAccount(username: string, email: string): Promise<User> {
+    if (!email) return;
+
+    const userModel = await this.prismaService.user.findFirst({
+      where: { OR: [{ username }, { profile: { email } }] },
+      include: include_roles_and_profile,
+    });
+
+    return this.#map(userModel);
+  }
+
   async updatePassword(user: User): Promise<void> {
     if (!user.id) return;
 
@@ -176,6 +189,17 @@ export class UserMysqlRepository implements UserRepository {
       where: { id: user.id },
       data: {
         password: user.password,
+      },
+    });
+  }
+
+  async updateEnable(user_id: string, enable: boolean): Promise<void> {
+    if (!user_id) return;
+
+    await this.prismaService.user.update({
+      where: { id: user_id },
+      data: {
+        enable,
       },
     });
   }
@@ -202,10 +226,11 @@ export class UserMysqlRepository implements UserRepository {
           id: userModel.id,
           username: userModel.username,
           password: userModel.password,
-          roles: roles,
-          profile,
+          enable: userModel.enable,
           created_at: userModel.created_at,
           updated_at: userModel.updated_at,
+          roles: roles,
+          profile,
         })
       : undefined;
   }

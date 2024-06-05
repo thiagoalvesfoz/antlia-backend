@@ -72,4 +72,15 @@ export class UsersController {
   ) {
     return this.usersService.updatePassword(user_id, updatePasswordDto);
   }
+
+  @Patch(':user_id/toggle-enable')
+  @Roles(Role.ADMIN)
+  @HttpCode(204)
+  @ApiResponse({
+    status: HttpStatus.NO_CONTENT,
+    description: 'A operação foi um sucesso',
+  })
+  toggleEnable(@Param('user_id') user_id: string) {
+    return this.usersService.toggleEnableUser(user_id);
+  }
 }
