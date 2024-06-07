@@ -55,7 +55,9 @@ export class ProductsController {
 
   @Get()
   findAll(@Query() params: ProductsQueryParam) {
-    return this.productsService.findAll(params);
+    return Boolean(params.resume === 'true')
+      ? this.productsService.resume()
+      : this.productsService.findAll(params);
   }
 
   @Get(':product_id')

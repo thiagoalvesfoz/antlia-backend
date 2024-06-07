@@ -12,6 +12,7 @@ import {
   ProductPagination,
   ProductQueryParam,
   ProductRepository,
+  ResumeInformations,
 } from './product.repository';
 import { PrismaService } from 'src/common/prisma/prisma.service';
 import { Image, Product } from '../../entities';
@@ -27,6 +28,7 @@ type ProductModelMapper = ProducModel & {
 @Injectable()
 export class ProductMysqlRepository implements ProductRepository {
   constructor(private readonly prismaService: PrismaService) {}
+
   async pagination(params: ProductQueryParam): Promise<ProductPagination> {
     const { skip, take, page, page_size } = getOffsetPagination(
       params.page,
@@ -43,7 +45,11 @@ export class ProductMysqlRepository implements ProductRepository {
       },
     };
 
-    const [total_items, total_published, total_unpublished, result] =
+    const orderBy = {
+      [params.order_by ?? 'created_at']: params.dir ?? 'desc',
+    };
+
+    const [total_items, total_published, total_unpublished, total_all, result] =
       (await this.prismaService.$transaction([
         this.prismaService.product.count({ where }),
         this.prismaService.product.count({
@@ -52,13 +58,14 @@ export class ProductMysqlRepository implements ProductRepository {
         this.prismaService.product.count({
           where: { ...where, status: ProductStatus.UNPUBLISHED },
         }),
+        this.prismaService.product.count({
+          where: { ...where, status: undefined },
+        }),
         this.prismaService.product.findMany({
           skip,
           take,
           where,
-          orderBy: {
-            created_at: 'desc',
-          },
+          orderBy,
           include: {
             category: {
               select: {
@@ -67,7 +74,7 @@ export class ProductMysqlRepository implements ProductRepository {
             },
           },
         }),
-      ])) as [number, number, number, ProducModel[]];
+      ])) as [number, number, number, number, ProducModel[]];
 
     const items = result.map(this.#map);
     const total_pages = Math.ceil(total_items / page_size);
@@ -79,7 +86,26 @@ export class ProductMysqlRepository implements ProductRepository {
       total_items,
       total_published,
       total_unpublished,
+      total_all,
       items,
+    };
+  }
+
+  async count(): Promise<ResumeInformations> {
+    const countPublished = { where: { status: ProductStatus.PUBLISHED } };
+    const countUnpublisehd = { where: { status: ProductStatus.UNPUBLISHED } };
+
+    const [total_all, total_published, total_unpublished] =
+      (await this.prismaService.$transaction([
+        this.prismaService.product.count(),
+        this.prismaService.product.count(countPublished),
+        this.prismaService.product.count(countUnpublisehd),
+      ])) as [number, number, number];
+
+    return {
+      total_published,
+      total_unpublished,
+      total_all,
     };
   }
 

@@ -9,13 +9,17 @@ export interface ProductQueryParam extends QueryParams {
   category?: string;
 }
 
-export interface ProductPagination extends EntityPagination<Product> {
+export interface ResumeInformations {
   total_published: number;
   total_unpublished: number;
+  total_all: number;
 }
+
+export type ProductPagination = EntityPagination<Product> & ResumeInformations;
 
 export interface ProductRepository {
   create(product: Product): Promise<Product>;
+  count(): Promise<ResumeInformations>;
   pagination(params: ProductQueryParam): Promise<ProductPagination>;
   findAll(): Promise<Product[]>;
   findById(product_id: string): Promise<Product>;

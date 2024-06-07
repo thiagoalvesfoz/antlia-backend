@@ -2,6 +2,8 @@ export interface QueryParams {
   readonly page: number;
   readonly page_size: number;
   readonly search?: string;
+  readonly order_by?: string;
+  readonly dir?: string;
 }
 
 export interface EntityPagination<T> {

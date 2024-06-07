@@ -53,6 +53,10 @@ export class ProductsService {
     return await this.productRepository.pagination(params);
   }
 
+  async resume() {
+    return await this.productRepository.count();
+  }
+
   async findOne(product_id: string) {
     const product = await this.productRepository.findById(product_id);
     if (!product) throw new ResourceNotFoundException('Product');
